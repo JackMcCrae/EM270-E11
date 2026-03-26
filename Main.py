@@ -1,3 +1,5 @@
+import math
+
 def parse_inputs(file_array):
     #empty array to hold everything
     parsed_data = []
@@ -14,22 +16,29 @@ def parse_inputs(file_array):
         #loop through each field in this data entry
         for b in len(parsed_data[a]):
             #check if this data needs broken down further and if it will cause errors from this knowledge
-            checked_value, valid_value = check_data_validity_and_reformat(parsed_data[a][b], b)
+            checked_value, valid_value = reformat_and_note_errors(parsed_data[a][b], b)
             #check if this section has caused errors, if so update if this data entry overall causes errors
             if valid_value == False:
                 overall_valid == False
             #add the seperated data to the array in place of original data
             parsed_data[a][b] = checked_value
         #add section to data entry for if data causes errors, this will continually be updated
-        if overall_valid == True:
-            parsed_data[a].append(True)
-        else:
-            parsed_data[a].append(False)
+        is_valid = [overall_valid]
+        parsed_data[a].append(is_valid)
     #return all the seperated values & if they cause errors
     return parsed_data
 
+def run_validation_checks(all_data):
+    #loop through all data values
+    for a in range(0,len(all_data)):
+        #check if data has already been shown to cause problems
+        if all_data[a][23] == False:
+            #put current data value through validation checker
+            all_data[a] = call_validations(all_data[a])
+    #return data with error and validation marks
+    return(all_data)
             
-def check_data_validity_and_reformat(current_entry, b):
+def reformat_and_note_errors(current_entry, b):
     #attempt to break down certain data points for later use, if an error occurs return that this section is a problem
     try:
         #temporary variables for processing data
@@ -69,10 +78,15 @@ def check_data_validity_and_reformat(current_entry, b):
             holder_d = [holder_a[0],holder_b[0],holder_c[0]]
             #set array that is returned = to final temperoary array
             current_entry = holder_d
+        else:
+            #cast current_entry into an array
+            current_entry = [current_entry]
         #return data entry and that there have been no errors
         return current_entry, True
     #run if error occurs
     except:
+        #cast current_entry into an array
+        current_entry = [current_entry]
         #return unchanged entry and that there was an error
         return current_entry, False
     
@@ -103,3 +117,96 @@ def div_error_checker(numerator,denominator):
     except:
         #return that there was an error
         return True
+
+def call_validations(current_entry):
+    #variable for if data is weird
+    dodgy_data = False
+    #data for if variable will cause errors and as such will be removed
+    new_error = False
+    #checks to run on data. All functions are named as what they will do
+    dodgy_data, new_error = check_distance_lat_and_long(current_entry)
+    dodgy_data, new_error = check_start_hour(current_entry)
+    dodgy_data, new_error = check_start_month(current_entry)
+    dodgy_data, new_error = check_trip_duration(current_entry)
+    dodgy_data, new_error = check_trip_category_with_duration(current_entry)
+    dodgy_data, new_error = check_if_weekend(current_entry)
+    dodgy_data, new_error = check_end_date_is_after_start_date(current_entry)
+    dodgy_data, new_error = trip_distance_is_real(current_entry)
+    dodgy_data, new_error = check_date_exists(current_entry)
+
+    #update if this line causes a major error
+    current_entry[23] = new_error
+    #add if the data looks dodgy
+    current_entry.append(dodgy_data)
+    return(current_entry)
+
+def check_distance_lat_and_long(data):
+    try:
+        #find change in latitude and longitude from start and end latitude and logitdue in data
+        delta_lat = float(data[19][0]) - float(data[17][0])
+        delta_long = float(data[20][0]) - float(data[18][0])
+        #use havesine formula to find distance around the earth based on these, then check it is >0.9 times the distance and <1.5 times it
+        if float(data[21][0]) >= 0.9*6371*2*math.asin(((math.sin(delta_lat/2)**2)+(math.cos(float(data[17][0]))*math.cos(float(data[19][0]))*(math.sin(delta_long/2))**2))**0.5) and float(data[21][0]) <= 1.5*6371*2*math.asin(((math.sin(delta_lat/2)**2)+(math.cos(data[17][0])*math.cos(data[19][0])*(math.sin(delta_long/2))**2))**0.5):
+            #if yes, any discrepincies are reasonable, so this isn't dodgy
+            return False, False
+        else:
+            #data is dodgy but doesn't cause errors
+            return True, False
+    except:
+        #data causes errors, don't use it anymore
+        return True, True
+
+
+def check_start_hour(data):
+    #attempt comparison
+    try:
+        #get hour from start date section
+        hour_from_date = int(data[0][3])
+        #get hour from start hour section
+        hour_from_hour = int(data[9][0])
+        #check if hours match
+        if hour_from_date == hour_from_hour:
+            #hours match and cause no erros so return that data is not prpblematic in any way
+            return False, False
+        else:
+            #hours don't match so they're sketchy, but also don't cause a crash. Return this
+            return True, False
+    #code for if an error occurs
+    except:
+        #return that the data is odd and that it should not be used in future
+        return True, True
+
+def check_start_month(data):
+    try:
+        #check if month from start_date matches with month from start_month
+        #strings starting with a 0 lose it when cast to an int
+        if int(data[0][1]) == 1 and data[10][0] == 'Janurary':
+            return False, False
+        elif int(data[0][1]) == 2 and data[10][0] == 'February':
+            return False, False
+        elif int(data[0][1]) == 3 and data[10][0] == 'March':
+            return False, False
+        elif int(data[0][1]) == 4 and data[10][0] == 'April':
+            return False, False
+        elif int(data[0][1]) == 5 and data[10][0] == 'May':
+            return False, False
+        elif int(data[0][1]) == 6 and data[10][0] == 'June':
+            return False, False
+        elif int(data[0][1]) == 7 and data[10][0] == 'July':
+            return False, False
+        elif int(data[0][1]) == 8 and data[10][0] == 'August':
+            return False, False
+        elif int(data[0][1]) == 9 and data[10][0] == 'September':
+            return False, False
+        elif int(data[0][1]) == 10 and data[10][0] == 'October':
+            return False, False
+        elif int(data[0][1]) == 11 and data[10][0] == 'Novermber':
+            return False, False
+        elif int(data[0][1]) == 12 and data[10][0] == 'December':
+            return False, False
+        #if months don't match data is dodgy but doesn't cause an error
+        else:
+            return True, False
+    #if an error occurs then the dta is dodgy and causes an error so return that
+    except:
+        return True, True
