@@ -25,6 +25,8 @@ def parse_inputs(file_array):
             parsed_data[a].append(True)
         else:
             parsed_data[a].append(False)
+    #return all the seperated values & if they cause errors
+    return parsed_data
 
             
 def check_data_validity_and_reformat(current_entry, b):
@@ -73,3 +75,31 @@ def check_data_validity_and_reformat(current_entry, b):
     except:
         #return unchanged entry and that there was an error
         return current_entry, False
+    
+def check_leap_year(year):
+    #check if multiple of 4
+    if div_error_checker(year,4) == True:
+        #when not a multiple of 4, not a leap year so return False
+        return False
+    #if it is a multiple of 4, check if it is a multiple of 100
+    elif div_error_checker(year,100) == True:
+        #when it is a multiple of 4 and not a multiple of 100 it is a leap yea, so return True
+        return True
+    #if it is a multiple of 4 and 100, check if it is a multiple of 400
+    elif div_error_checker(year,400) == False:
+        #when it is a multiple of 400 it is a leap year, so return True
+        return True
+
+def div_error_checker(numerator,denominator):
+    #attempt to divide the numerator by the denominator to find if the numerator is a multiple
+    try:
+        #divide numerator by denominator
+        a = numerator/denominator
+        #cast a into an integer, if numerator/denominator is an int numerator is a multiple of denominator, otherwise causes an error
+        a = int(a)
+        #if no error return False for no error
+        return False
+    #if there is an error in the above section execute this section
+    except:
+        #return that there was an error
+        return True
