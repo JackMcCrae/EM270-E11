@@ -106,14 +106,17 @@ def check_leap_year(data):
             #when it is a multiple of 400 it is a leap year, so return True
             return True
     #compensate for lack of year 0, our callendar had no year between 1 BCE/BC and 1 CE/AD by adding 1 to year
+    #assumes that year is given in terms of BCE/BC and CE/AD, where a negative value is for BCE/BC and positive is for CE/AD
+    #this really isn't necessary
     else:
+        print('Why is a value from before the year 1?')
         #check if multiple of 4
         if div_error_checker(int(data[0][2]+1,4)) == True:
             #when not a multiple of 4, not a leap year so return False
             return False
         #if it is a multiple of 4, check if it is a multiple of 100
         elif div_error_checker(int(data[0][2])+1,100) == True:
-            #when it is a multiple of 4 and not a multiple of 100 it is a leap yea, so return True
+            #when it is a multiple of 4 and not a multiple of 100 it is a leap year, so return True
             return True
         #if it is a multiple of 4 and 100, check if it is a multiple of 400
         elif div_error_checker(int(data[0][2])+1,400) == False:
@@ -137,24 +140,64 @@ def div_error_checker(numerator,denominator):
 def call_validations(current_entry):
     #variable for if data is weird
     dodgy_data = False
+    current_entry.append(dodgy_data)
     #data for if variable will cause errors and as such will be removed
     new_error = False
     #checks to run on data. All functions are named as what they will do
     dodgy_data, new_error = check_distance_lat_and_long(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
     dodgy_data, new_error = check_start_hour(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
     dodgy_data, new_error = check_start_month(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
     dodgy_data, new_error = check_trip_duration(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
     dodgy_data, new_error = check_trip_category_with_duration(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
     dodgy_data, new_error = check_if_weekend(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
     dodgy_data, new_error = check_end_date_is_after_start_date(current_entry)
-    dodgy_data, new_error = trip_distance_is_real(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
+    dodgy_data, new_error = check_trip_time_speed_and_distance(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
     dodgy_data, new_error = check_date_exists(current_entry)
+    if new_error == True:
+        current_entry[23] = new_error
+    if dodgy_data == True:
+        current_entry[24] = dodgy_data
 
-    #update if this line causes a major error
-    current_entry[23] = new_error
-    #add if the data looks dodgy
-    current_entry.append(dodgy_data)
     return(current_entry)
+
+def remove_big_errors(whole_data_set):
+    for i in len(whole_data_set):
+        if whole_data_set[i][23] == True:
+            whole_data_set.pop(i)
+    return whole_data_set
+
 
 def check_distance_lat_and_long(data):
     try:
@@ -229,33 +272,146 @@ def check_start_month(data):
     
 def check_trip_duration(data):
     try:
+        #check if the start date and end date have the same date
         if data[0][0] == data[2][0] and data[0][1] == data[2][1] and data[0][2] == data[2][2]:
+            #find time past 00:00 of trip start, in seconds
             start_time = int(data[0][3])*3600 + int(data[0][4])*60 + int(data[0][5])
+            #find time past 00:00 of the trip end, in seconds
             end_time = int(data[2][3])*3600 + int(data[2][4])*60 + int(data[2][5])
+            #find time between start and end
             duration = end_time - start_time
+            #check if time between start and finish, when converted to minutes, is within a reasonable margin of error of the time listed in the data entry
             if float(duration)/60 <= 1.1*float(data[6][0]) and float(duration) >= 0.9*float(data[6][0]):
+                #if it is, no issues with data
                 return False, False
             else:
+                #otherwise, there are issues with the data but they do not pose a risk of causing a crash
                 return True, False
+        #check if year and month match
         elif data[0][1] == data[2][1] and data[0][2] == data[2][2]:
+            #find the difference in  days, convert it to seconds
             day_related_change_in_time = (int(data[2][0]) - int(data[0][0]))*86400
+            #find time past 00:00 on start day of start time
             start_time = int(data[0][3])*3600 + int(data[0][4])*60 + int(data[0][5])
+            #find time past 00:00 on start date of end time, using difference in time from difference in days
             end_time = int(data[2][3])*3600 + int(data[2][4])*60 + int(data[2][5]) + day_related_change_in_time
+            #use times to find duration
             duration = end_time - start_time
+            #convert duration to minutes and check if it is within reasonable margin of error of the time listed in data entry
+            if float(duration)/60 <= 1.1*float(data[6][0]) and float(duration) >= 0.9*float(data[6][0]):
+                #if it is, no issues with data
+                return False, False
+            else:
+                #otherwise, there are issues with the data but they cause no risk of crashing
+                return True, False
+        #check if years match
+        elif data[0][2] == data[2][2]:
+            #if the month is april, june, september or november, handle this with a 30 day long month
+            if int(data[0][1]) == 4 or int(data[0][1]) == 6 or int(data[0][1]) == 9 or int(data[0][1]) == 11:
+                #set change in time from day/month to position of end day in month - position of start day in month plus length of month times the number of seconds in a day
+                day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 30)*86400
+            #if the month is february handle this using february lengths, including checks for leap years
+            elif data[0][1] == 2:
+                #call check leap year function
+                if check_leap_year(data) == True:
+                    #if it is a leap year use a month length of 29
+                    day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 29)*86400
+                else:
+                    #otherwise the length of the month is 28 so use that
+                    day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 28)*86400
+            #all other cases are months with 31 days in it
+            else:
+                #use a month length of 31 for time change
+                day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 31)*86400
+            #convert to minutes and compare with value from dataset with tollerances
             if float(duration)/60 <= 1.1*float(data[6][0]) and float(duration) >= 0.9*float(data[6][0]):
                 return False, False
             else:
                 return True, False
-        elif data[0][2] == data[2][2]:
-            if int(data[0][1]) == 4 or int(data[0][1]) == 6 or int(data[0][1]) == 9 or int(data[0][1]) == 11:
-                day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 30)*86400
-            elif data[0][1] == 2:
-                if check_leap_year(data) == True:
+    except:
+        return True, True
+    
+def check_trip_category_with_duration(data):
+    try:
+        #check if trip duration falls within bounds of the trip type
+        if float(data[6][0]) >= float(data[7][1]) and float(data[6][0]) <= float(data[7][2]):
+            #if it falls within range, no issues
+            return False, False
+        else:
+            #if not say there're issues but not any that'll crash
+            return True, False
+    except:
+        #if things break return that it breaks
+        return True, True
+    
+def check_if_weekend(data):
+    try:
+        #compare day of week to if 'is_weekend' is high. If high on weekend, return that there are no issues
+        if (data[10][0] == 'Saturday' and int(data[12][0]) != 0) or (data[10][0] == 'Sunday' and int(data[12][0]) != 0):
+            return False, False
+        #otherwise if it is high return that there is an issue
+        elif int(data[12][0]) != 0:
+            return True, False
+        #otherwise all is good
+        else:
+            return False, False
+    except:
+        #otherwise mention big issues
+        return True, True
+    
+def check_end_date_is_after_start_date(data):
+    try:
+        #check if end year is after start year
+        #return no issues if it is
+        #check if start year is after end year
+        #return issues if it is
+        #repeat for every denomination of time getting smaller as you go
+        if int(data[2][2]) > int(data[0][2]):
+            return False, False
+        elif int(data[2][2]) < int(data[0][2]):
+            return True, False
+        elif int(data[2][1]) > int(data[0][1]):
+            return False, False
+        elif int(data[2][1]) < int(data[0][1]):
+            return True, False
+        elif int(data[2][0]) > int(data[0][0]):
+            return False, False
+        elif int(data[2][0]) < int(data[0][0]):
+            return True, False
+        elif int(data[2][4]) > int(data[0][3]):
+            return False, False
+        elif int(data[2][4]) < int(data[0][3]):
+            return True, False
+        elif int(data[2][4]) > int(data[0][4]):
+            return False, False
+        elif int(data[2][4]) < int(data[0][4]):
+            return True, False
+        elif int(data[2][5]) > int(data[0][5]):
+            return False, False
+        elif int(data[2][5]) < int(data[0][5]):
+            return True, False
+        else:
+            return True, False
+    except:
+        return True, True
 
-            else:
-                day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 31)*86400
-        
+def check_trip_time_speed_and_distance(data):
+    try:
+        if float(data[6][0])*float(data[22][0]) >= 0.9*float(data[21][0]) and float(data[6][0])*float(data[22][0]) <= 0.9*float(data[21][0]):
+            return False, False
+        else:
+            return True, False
+    except:
+        return True, True
 
-
+def check_date_exists(data):
+    try:
+        if int(data[0][2]) == 0 or int(data[2][2]) == 0:
+            return True, False
+        elif (int(data[0][1]) <= 12 and int(data[0][1]) >= 1) and (int(data[2][1]) <= 12 and int(data[2][1]) >= 1):
+            return False, False
+        elif (int(data[0][1]) == 4 or int(data[0][1]) == 6 or int(data[0][1]) == 9 or int(data[0][1]) == 11) and (int(data[2][1]) == 4 or int(data[2][1]) == 6 or int(data[2][1]) == 9 or int(data[2][1]) == 11) and int(data[0][0]) <= 30 and int(data[0][0]):
+            return False, False
+        '''come back and finish this!'''
     except:
         return True, True
