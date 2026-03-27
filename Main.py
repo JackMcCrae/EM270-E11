@@ -90,19 +90,35 @@ def reformat_and_note_errors(current_entry, b):
         #return unchanged entry and that there was an error
         return current_entry, False
     
-def check_leap_year(year):
-    #check if multiple of 4
-    if div_error_checker(year,4) == True:
-        #when not a multiple of 4, not a leap year so return False
-        return False
-    #if it is a multiple of 4, check if it is a multiple of 100
-    elif div_error_checker(year,100) == True:
-        #when it is a multiple of 4 and not a multiple of 100 it is a leap yea, so return True
-        return True
-    #if it is a multiple of 4 and 100, check if it is a multiple of 400
-    elif div_error_checker(year,400) == False:
-        #when it is a multiple of 400 it is a leap year, so return True
-        return True
+def check_leap_year(data):
+    #checking if year is after year 1 AD
+    if int(data[0][2] > 0):
+        #check if multiple of 4
+        if div_error_checker(int(data[0][2],4)) == True:
+            #when not a multiple of 4, not a leap year so return False
+            return False
+        #if it is a multiple of 4, check if it is a multiple of 100
+        elif div_error_checker(int(data[0][2]),100) == True:
+            #when it is a multiple of 4 and not a multiple of 100 it is a leap yea, so return True
+            return True
+        #if it is a multiple of 4 and 100, check if it is a multiple of 400
+        elif div_error_checker(int(data[0][2]),400) == False:
+            #when it is a multiple of 400 it is a leap year, so return True
+            return True
+    #compensate for lack of year 0, our callendar had no year between 1 BCE/BC and 1 CE/AD by adding 1 to year
+    else:
+        #check if multiple of 4
+        if div_error_checker(int(data[0][2]+1,4)) == True:
+            #when not a multiple of 4, not a leap year so return False
+            return False
+        #if it is a multiple of 4, check if it is a multiple of 100
+        elif div_error_checker(int(data[0][2])+1,100) == True:
+            #when it is a multiple of 4 and not a multiple of 100 it is a leap yea, so return True
+            return True
+        #if it is a multiple of 4 and 100, check if it is a multiple of 400
+        elif div_error_checker(int(data[0][2])+1,400) == False:
+            #when it is a multiple of 400 it is a leap year, so return True
+            return True
 
 def div_error_checker(numerator,denominator):
     #attempt to divide the numerator by the denominator to find if the numerator is a multiple
@@ -208,5 +224,38 @@ def check_start_month(data):
         else:
             return True, False
     #if an error occurs then the dta is dodgy and causes an error so return that
+    except:
+        return True, True
+    
+def check_trip_duration(data):
+    try:
+        if data[0][0] == data[2][0] and data[0][1] == data[2][1] and data[0][2] == data[2][2]:
+            start_time = int(data[0][3])*3600 + int(data[0][4])*60 + int(data[0][5])
+            end_time = int(data[2][3])*3600 + int(data[2][4])*60 + int(data[2][5])
+            duration = end_time - start_time
+            if float(duration)/60 <= 1.1*float(data[6][0]) and float(duration) >= 0.9*float(data[6][0]):
+                return False, False
+            else:
+                return True, False
+        elif data[0][1] == data[2][1] and data[0][2] == data[2][2]:
+            day_related_change_in_time = (int(data[2][0]) - int(data[0][0]))*86400
+            start_time = int(data[0][3])*3600 + int(data[0][4])*60 + int(data[0][5])
+            end_time = int(data[2][3])*3600 + int(data[2][4])*60 + int(data[2][5]) + day_related_change_in_time
+            duration = end_time - start_time
+            if float(duration)/60 <= 1.1*float(data[6][0]) and float(duration) >= 0.9*float(data[6][0]):
+                return False, False
+            else:
+                return True, False
+        elif data[0][2] == data[2][2]:
+            if int(data[0][1]) == 4 or int(data[0][1]) == 6 or int(data[0][1]) == 9 or int(data[0][1]) == 11:
+                day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 30)*86400
+            elif data[0][1] == 2:
+                if check_leap_year(data) == True:
+
+            else:
+                day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 31)*86400
+        
+
+
     except:
         return True, True
