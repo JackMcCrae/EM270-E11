@@ -90,19 +90,19 @@ def reformat_and_note_errors(current_entry, b):
         #return unchanged entry and that there was an error
         return current_entry, False
     
-def check_leap_year(data):
+def check_leap_year(data,field):
     #checking if year is after year 1 AD
-    if int(data[0][2] > 0):
+    if int(data[field][2] > 0):
         #check if multiple of 4
-        if div_error_checker(int(data[0][2],4)) == True:
+        if div_error_checker(int(data[field][2],4)) == True:
             #when not a multiple of 4, not a leap year so return False
             return False
         #if it is a multiple of 4, check if it is a multiple of 100
-        elif div_error_checker(int(data[0][2]),100) == True:
+        elif div_error_checker(int(data[field][2]),100) == True:
             #when it is a multiple of 4 and not a multiple of 100 it is a leap yea, so return True
             return True
         #if it is a multiple of 4 and 100, check if it is a multiple of 400
-        elif div_error_checker(int(data[0][2]),400) == False:
+        elif div_error_checker(int(data[field][2]),400) == False:
             #when it is a multiple of 400 it is a leap year, so return True
             return True
     #compensate for lack of year 0, our callendar had no year between 1 BCE/BC and 1 CE/AD by adding 1 to year
@@ -111,15 +111,15 @@ def check_leap_year(data):
     else:
         print('Why is a value from before the year 1?')
         #check if multiple of 4
-        if div_error_checker(int(data[0][2]+1,4)) == True:
+        if div_error_checker(int(data[field][2]+1,4)) == True:
             #when not a multiple of 4, not a leap year so return False
             return False
         #if it is a multiple of 4, check if it is a multiple of 100
-        elif div_error_checker(int(data[0][2])+1,100) == True:
+        elif div_error_checker(int(data[field][2])+1,100) == True:
             #when it is a multiple of 4 and not a multiple of 100 it is a leap year, so return True
             return True
         #if it is a multiple of 4 and 100, check if it is a multiple of 400
-        elif div_error_checker(int(data[0][2])+1,400) == False:
+        elif div_error_checker(int(data[field][2])+1,400) == False:
             #when it is a multiple of 400 it is a leap year, so return True
             return True
 
@@ -312,7 +312,7 @@ def check_trip_duration(data):
             #if the month is february handle this using february lengths, including checks for leap years
             elif data[0][1] == 2:
                 #call check leap year function
-                if check_leap_year(data) == True:
+                if check_leap_year(data,0) == True:
                     #if it is a leap year use a month length of 29
                     day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 29)*86400
                 else:
@@ -427,9 +427,12 @@ def check_date_exists(data):
         elif (int(data[0][1]) == 2 and data[0][0] > 29 and int(data[0][0]) < 1) or (int(data[2][1]) == 2 and data[2][0] > 29 and int(data[21][0]) < 1):
             return True, False
         #check if it is the 29th of february
-        elif (int(data[0][0]) == 29 and int(data[0][1]) == 2) or (int(data[2][0]) == 29 and int(data[2][1]) == 2):
+        elif (int(data[0][0]) == 29 and int(data[0][1]) == 2):
             #check if it is a leap year
-            if check_leap_year(data) == False:
+            if check_leap_year(data,0) == False:
+                return True, False
+        elif (int(data[2][0]) == 29 and int(data[2][1]) == 2):
+            if check_leap_year(data,2) == False:
                 return True, False
         #check if the day falls between the 31st and 1st
         elif int(data[0][0]) > 31 or int(data[0][0]) < 1 or int(data[2][0]) > 31 or int(data[2][0]) < 1:
