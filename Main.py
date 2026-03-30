@@ -527,3 +527,16 @@ def bubble_sort_arrays(number_array, info_array):
     #return sorted arrays
     return info_array, number_array
 
+def filter_start_day(data):
+    #make empty array for filtered data
+    filtered_data = []
+    #get day to filter for from user
+    chosen_day = str(input('Enter day to filter by: '))
+    #loop for number of entries in dataset
+    for a in range(0,len(data)):
+        #check if day matches day chosen by user using .upper() to remove case sensitivity
+        if data[a][10][0].upper() == chosen_day.upper():
+            #if it is add it to filtered data array
+            filtered_data.append(data[a])
+    #return the now filtered data
+    return filtered_data
