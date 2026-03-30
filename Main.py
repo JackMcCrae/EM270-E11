@@ -540,3 +540,47 @@ def filter_start_day(data):
             filtered_data.append(data[a])
     #return the now filtered data
     return filtered_data
+
+def analyse_filter_data(data):
+    #set total journeys equal to number of data entries
+    total_journeys = len(data)
+    #set minimum trip duration to first duration entry
+    minimum_trip_duration = data[0][6][0]
+    #set maximum trip ruation to first duration entry
+    maximum_trip_duration = data[0][6][0]
+    #set total trip duration to first duration entry
+    total_trip_duration = data[0][6][0]
+    #set minimum trip distance to first distance entry
+    minimum_trip_distance = data[0][21][0]
+    #set maximum trip distance to first distance entry
+    maximum_trip_distance = data[0][21][0]
+    #set total trip distance to first distance netry
+    total_trip_distance = data[0][21][0]
+    #loop for every trip entry but first entry as it has already been entered
+    for a in range(1,total_journeys):
+        #check for new minimum trip duration
+        if data[a][6][0] < minimum_trip_duration:
+            #update new minimum
+            minimum_trip_duration = data[a][6][0]
+        #if not new minimum trip duration, check for new maximum trip duration
+        elif data[a][6][0] > maximum_trip_duration:
+            #update new maximum
+            maximum_trip_duration = data[a][6][0]
+        #check for new minim trip distance
+        if data[a][21][0] < minimum_trip_distance:
+            #update new minimum
+            minimum_trip_distance = data[a][21][0]
+        #if not new minimum trip distance, check for new maximum trip distance
+        elif data[a][21][0] > maximum_trip_distance:
+            #update new maximum
+            maximum_trip_distance = data[a][21][0]
+        #update total duration
+        total_trip_duration = total_trip_duration + data[a][6][0]
+        #update total distance
+        total_trip_distance = total_trip_distance + data[a][21][0]
+    #divide total duration by trip number for average trip duration
+    average_trip_duration = total_trip_duration/total_journeys
+    #divide total distance by trip number for average trip duration
+    average_trip_distance = total_trip_distance/total_journeys
+    #return total journeys, minimum, maximum and total duration and minim, maximum and total distance
+    return total_journeys, minimum_trip_duration, maximum_trip_duration, average_trip_duration, maximum_trip_distance, maximum_trip_distance, average_trip_distance
