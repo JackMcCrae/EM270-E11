@@ -397,7 +397,9 @@ def check_end_date_is_after_start_date(data):
 
 def check_trip_time_speed_and_distance(data):
     try:
-        if float(data[6][0])*float(data[22][0]) >= 0.9*float(data[21][0]) and float(data[6][0])*float(data[22][0]) <= 0.9*float(data[21][0]):
+        #check that the distance found from time and speed is within +50/-10% of the distance listed
+        if float(data[6][0])*float(data[22][0]) >= 0.9*float(data[21][0]) and float(data[6][0])*float(data[22][0]) <= 1.5*float(data[21][0]):
+            #if it is say we're happy
             return False, False
         else:
             return True, False
@@ -406,12 +408,47 @@ def check_trip_time_speed_and_distance(data):
 
 def check_date_exists(data):
     try:
+        #check year isn't 0CE/AD or 0BCE/BC as that year doesn't exist
         if int(data[0][2]) == 0 or int(data[2][2]) == 0:
             return True, False
+        #check it is one of the 12 months
         elif (int(data[0][1]) <= 12 and int(data[0][1]) >= 1) and (int(data[2][1]) <= 12 and int(data[2][1]) >= 1):
             return False, False
-        elif (int(data[0][1]) == 4 or int(data[0][1]) == 6 or int(data[0][1]) == 9 or int(data[0][1]) == 11) and (int(data[2][1]) == 4 or int(data[2][1]) == 6 or int(data[2][1]) == 9 or int(data[2][1]) == 11) and int(data[0][0]) <= 30 and int(data[0][0]):
+        #check if start month is a month with 30 days
+        elif int(data[0][1]) == 4 or int(data[0][1]) == 6 or int(data[0][1]) == 9 or int(data[0][1]) == 11:
+            #check if the number of days matches that length
+            if int(data[0][0]) < 1 or int(data[0][0]) > 30:
+                return True, False
+        #check if end month is a month with 30 days
+        elif int(data[2][1]) == 4 or int(data[2][1]) == 6 or int(data[2][1]) == 9 or int(data[2][1]) == 11:
+            #check if the number of days matches that length
+            if int(data[2][0]) < 1 or int(data[2][0]) > 30:
+                return True, False
+        #check if it is february and the right number of days in february
+        elif (int(data[0][1]) == 2 and data[0][0] > 29 and int(data[0][0]) < 1) or (int(data[2][1]) == 2 and data[2][0] > 29 and int(data[21][0]) < 1):
+            return True, False
+        #check if it is the 29th of february
+        elif (int(data[0][0]) == 29 and int(data[0][1]) == 2) or (int(data[2][0]) == 29 and int(data[2][1]) == 2):
+            #check if it is a leap year
+            if check_leap_year(data) == False:
+                return True, False
+        #check if the day falls between the 31st and 1st
+        elif int(data[0][0]) > 31 or int(data[0][0]) < 1 or int(data[2][0]) > 31 or int(data[2][0]) < 1:
+            return True, False
+        #otherwise we're all good
+        else:
             return False, False
-        '''come back and finish this!'''
     except:
         return True, True
+    
+def remove_error_causing_entries(data):
+    #find initial length of array
+    b = len(data)
+    #loop for initial number of items in array
+    for a in range(0, b):
+        #going backwards through the array check if this entry contains data that will cause an error
+        if data[b-a][23][0] == True:
+            #if it does, pop it
+            data.pop(b-a)
+    #return data that will not cause errors
+    return data
