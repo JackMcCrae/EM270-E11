@@ -498,16 +498,16 @@ def check_unique_stations_and_station_usage_frequency(data):
             end_station_usage.append(1)
    
     #sort stations by how many times they are the start station and save as it's own array, as well as number of times started at that station
-    start_stations, start_station_usage = bubble_sort_arrays(start_station_usage, stations)
+    start_stations, start_station_usage = bubble_sort_parallel_arrays(start_station_usage, stations)
     #sort stations by how many times they are the end station and save as it's own array, as well as number of times ended at that station
-    end_stations, end_station_usage = bubble_sort_arrays(end_station_usage, stations)
+    end_stations, end_station_usage = bubble_sort_parallel_arrays(end_station_usage, stations)
     
     
 
     #return array of stations visited, number of stations visited and the number of times each station was visited, all sorted
     return len(stations), start_station_usage, start_stations, end_station_usage, end_stations
 
-def bubble_sort_arrays(number_array, info_array):
+def bubble_sort_parallel_arrays(number_array, info_array):
     #set boolean of if the array is sorted to false
     is_sorted = False
     #while array is not sorted
