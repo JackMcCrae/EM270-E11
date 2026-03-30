@@ -215,7 +215,6 @@ def check_distance_lat_and_long(data):
         #data causes errors, don't use it anymore
         return True, True
 
-
 def check_start_hour(data):
     #attempt comparison
     try:
@@ -452,3 +451,79 @@ def remove_error_causing_entries(data):
             data.pop(b-a)
     #return data that will not cause errors
     return data
+
+def check_unique_stations_and_station_usage_frequency(data):
+    #check if start and end stations in initial journey match, if not add both to array of stations
+    if data[0][1][0] != data[0][3][0]:
+        stations = [data[0][1][0], data[0][3][0]]
+        start_station_usage = [1,0]
+        end_station_usage = [0,1]
+    #if they do match, add start station to array of stations
+    else:
+        stations = data[0][1][0]
+        start_station_usage = [1]
+        end_station_usage = [1]
+    #loop through every date entry starting at second
+    for a in range(1,len(data)):
+        #set initial variables to say that start and end stations are not previously visited
+        start_match = False
+        end_match = False
+        #loop through every station that has been visited
+        for b in range(0,len(stations)):
+            #check if journey started at this station
+            if stations[b] == data[a][1][0]:
+                #if the start station has been visited before state that start station has been visted before
+                start_match = True
+                start_station_usage[b] += 1
+            #check if journey ended at this station
+            if stations[b] == data[a][3][0]:
+                #if the end station has been visited before state that the end station has been visited before
+                end_match = True
+                end_station_usage[b] += 1
+            #check if both start and end stations have been visited before
+            if start_match == True and end_match == True:
+                #stop looping through stations
+                break
+        #check if start station has been visited before
+        if start_match == False:
+            #if it has not, add it to array of stations
+            stations.append(data[a][1][0])
+            start_station_usage.append(1)
+            end_station_usage.append(0)
+        #check if end station has been visited before
+        if end_match == False and start_match != True:
+            #if it has not, add it to array of stations
+            stations.append(data[a][3][0])
+            start_station_usage.append(0)
+            end_station_usage.append(1)
+   
+    #sort stations by how many times they are the start station and save as it's own array, as well as number of times started at that station
+    start_stations, start_station_usage = bubble_sort_arrays(start_station_usage, stations)
+    #sort stations by how many times they are the end station and save as it's own array, as well as number of times ended at that station
+    end_stations, end_station_usage = bubble_sort_arrays(end_station_usage, stations)
+    
+    
+
+    #return array of stations visited, number of stations visited and the number of times each station was visited, all sorted
+    return len(stations), start_station_usage, start_stations, end_station_usage, end_stations
+
+def bubble_sort_arrays(number_array, info_array):
+    #set boolean of if the array is sorted to false
+    is_sorted = False
+    #while array is not sorted
+    while is_sorted == False:
+        #initially say that the array is sorted
+        is_sorted = True
+        #loop for thength of array
+        for a in range(0,len(number_array)-1):
+            #check if value of current array position is greater than next in array of start/end uses
+            if number_array[a] > number_array[a+1]:
+                #if it is, switch current and next positions in the array of number of occurrences
+                number_array[a], number_array[a+1] = number_array[a+1], number_array[a]
+                #also switch current and next name in the array of names
+                info_array[a], info_array[a+1] = number_array[a+1], number_array[a]
+                #say that the arrays are not sorted yet
+                is_sorted = False
+    #return sorted arrays
+    return info_array, number_array
+
