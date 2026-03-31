@@ -310,7 +310,7 @@ def check_trip_duration(data):
                 #set change in time from day/month to position of end day in month - position of start day in month plus length of month times the number of seconds in a day
                 day_related_change_in_time = (int(data[2][0]) - int(data[0][0]) + 30)*86400
             #if the month is february handle this using february lengths, including checks for leap years
-            elif data[0][1] == 2:
+            elif int(data[0][1] == 2):
                 #call check leap year function
                 if check_leap_year(data,0) == True:
                     #if it is a leap year use a month length of 29
@@ -487,19 +487,29 @@ def check_unique_stations_and_station_usage_frequency(data):
             if start_match == True and end_match == True:
                 #stop looping through stations
                 break
-        #check if start station has been visited before
-        if start_match == False:
+        #check if start station has been visited
+        if start_match == False and end_match == True:
             #if it has not, add it to array of stations
             stations.append(data[a][1][0])
             start_station_usage.append(1)
             end_station_usage.append(0)
-        #check if end station has been visited before
-        if end_match == False and start_match != True:
-            #if it has not, add it to array of stations
-            stations.append(data[a][3][0])
+        elif start_match == True and end_match == False:
+            stations.append(data[a][1][0])
             start_station_usage.append(0)
             end_station_usage.append(1)
+        elif start_match == end_match == False:
+            if data[a][1][0] == data[a][3][0]:
+                stations.append(data[a][1][0])
+                start_station_usage.append(1)
+                end_station_usage.append(1)
+            else:
+                stations.append(data[a][1][0], data[a][3][0])
+                start_station_usage.append(1,0)
+                end_station_usage.append(0,1)
    
+    #add the unsorted ones together
+    total_station_usage = start_station_usage + end_station_usage
+
     #sort stations by how many times they are the start station and save as it's own array, as well as number of times started at that station
     start_stations, start_station_usage = bubble_sort_parallel_arrays(start_station_usage, stations)
     #sort stations by how many times they are the end station and save as it's own array, as well as number of times ended at that station
@@ -508,7 +518,7 @@ def check_unique_stations_and_station_usage_frequency(data):
     
 
     #return array of stations visited, number of stations visited and the number of times each station was visited, all sorted
-    return len(stations), start_station_usage, start_stations, end_station_usage, end_stations
+    return len(stations), total_station_usage, stations, start_station_usage, start_stations, end_station_usage, end_stations
 
 def bubble_sort_parallel_arrays(number_array, info_array):
     #set boolean of if the array is sorted to false
@@ -587,3 +597,9 @@ def analyse_filter_data(data):
     average_trip_distance = total_trip_distance/total_journeys
     #return total journeys, minimum, maximum and total duration and minim, maximum and total distance
     return total_journeys, minimum_trip_duration, maximum_trip_duration, average_trip_duration, maximum_trip_distance, maximum_trip_distance, average_trip_distance
+
+def open_files():
+    files = []
+    for a in range(0,int(input("How many files do you want to open? "))):
+        files.append(open(str(input('Enter file name and path: ')),'r'))
+    return files
