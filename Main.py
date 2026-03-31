@@ -41,6 +41,8 @@ def run_validation_checks(all_data):
 def reformat_and_note_errors(current_entry, b):
     #attempt to break down certain data points for later use, if an error occurs return that this section is a problem
     try:
+        #remove he random apostrophes
+        current_entry = remove_random_apostrophe(current_entry)
         #temporary variables for processing data
         holder_a = []
         holder_b = []
@@ -192,12 +194,6 @@ def call_validations(current_entry):
 
     return(current_entry)
 
-def remove_big_errors(whole_data_set):
-    for i in len(whole_data_set):
-        if whole_data_set[i][23] == True:
-            whole_data_set.pop(i)
-    return whole_data_set
-
 
 def check_distance_lat_and_long(data):
     try:
@@ -280,7 +276,7 @@ def check_trip_duration(data):
             #find time between start and end
             duration = end_time - start_time
             #check if time between start and finish, when converted to minutes, is within a reasonable margin of error of the time listed in the data entry
-            if float(duration)/60 <= 1.1*float(data[6][0]) and float(duration) >= 0.9*float(data[6][0]):
+            if (float(duration)/60 <= 1.1*float(data[6][0]) and float(duration)/60 >= 0.9*float(data[6][0])):
                 #if it is, no issues with data
                 return False, False
             else:
@@ -329,7 +325,7 @@ def check_trip_duration(data):
                 return True, False
     except:
         return True, True
-    
+
 def check_trip_category_with_duration(data):
     try:
         #check if trip duration falls within bounds of the trip type
@@ -599,7 +595,34 @@ def analyse_filter_data(data):
     return total_journeys, minimum_trip_duration, maximum_trip_duration, average_trip_duration, maximum_trip_distance, maximum_trip_distance, average_trip_distance
 
 def open_files():
+    #make empty array for files
     files = []
+    #loop for a number of times specified by user
     for a in range(0,int(input("How many files do you want to open? "))):
+        #open file in location specified by user and append it to array of files
         files.append(open(str(input('Enter file name and path: ')),'r'))
+    #return array of files
     return files
+
+def close_files(files):
+    #loop through array of files
+    for a in files:
+        #close file in current position of array
+        a.close()
+    return
+
+def remove_random_apostrophe(data):
+    #loop for number of data points in data entry
+    for a in range(0,len(data)):
+        #create empty string
+        c = ''
+        #check if first character is a random '
+        if ord(data[a][0]) == 39:
+            #if it is, loop through every item in this string except the first
+            for b in len(1,data[a]):
+                #concatinate current letter in string to new string
+                c = c + b
+            #replace variable that has random apostrophe with variable without random apostrophe
+            data[a] = c
+    #return further processed data
+    return data
