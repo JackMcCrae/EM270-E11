@@ -626,3 +626,125 @@ def remove_random_apostrophe(data):
             data[a] = c
     #return further processed data
     return data
+
+def start_year_filter(data):
+    #store inital length of array
+    b = len(data)
+    #ask for year to filter for
+    year = int(input('Enter year to filter for: '))
+    #loop through all data entries
+    for a in range(0,b):
+        #check if the data entry runs afoul of the filter, looping from the back to avoid issues when removing items
+        if int(data[b-a][0][2]) != year:
+            #remove item that does not meet filter criteria
+            data.pop(b-a)
+    return data
+
+def end_year_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    year = int(input('Enter year to filter for: '))
+    for a in range(0,b):
+        if int(data[b-a][2][2]) != year:
+            data.pop(b-a)
+    return data
+
+def start_station_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    station = str(input('Enter station name to filter by: '))
+    for a in range(0,b):
+        if data[b-a][1][0] != station:
+            data.pop(b-a)
+    return data
+
+def end_station_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    station = str(input('Enter station name to filter by: '))
+    for a in range(0,b):
+        if data[b-a][3][0] != station:
+            data.pop(b-a)
+    return data
+
+def rush_hour_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    c = str(input('Filter for during rush hour(d) or not during russh hour(nd): '))
+    for a in range(0,b):
+        if (int(data[b-a][14][0]) == 0 and c.lower() == 'd') or (int(data[b-a][14][0]) != 0 and c.lower == 'nd'):
+            data.pop[b-a]
+    return data
+
+def start_area_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    area = str(input('Enter area name to filter by: '))
+    for a in range(0,b):
+        if data[b-a][1][1] != area:
+            data.pop(b-a)
+    return data
+
+def end_area_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    area = str(input('Enter area name to filter by: '))
+    for a in range(0,b):
+        if data[b-a][3][1] != area:
+            data.pop(b-a)
+    return data
+
+def start_hour_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    start_hour = str(input('Enter hour to filter by: '))
+    for a in range(0,b):
+        if data[b-a][0][3] != start_hour:
+            data.pop[b-a]
+    return data
+
+def end_hour_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    start_hour = str(input('Enter hour to filter by: '))
+    for a in range(0,b):
+        if data[b-a][2][3] != start_hour:
+            data.pop[b-a]
+    return data
+
+def call_filters(data):
+    #ask user how many filters to apply
+    number_of_filters = int(input('How many filters do you want to add: '))
+    #loop for number of filters the user wishes to implement
+    for a in range(0,number_of_filters):
+        #print list of filters available
+        print('Available filters:\n1 : filter by day of week\n2 : filter by start year\n3 : filter by end year\n4 : filter by start hour\n5 : filter by end hour\n6 : filter by start station\n7 : filter by end station\n8 : filter by start area\n9 : filter by end area\n10 : filter by rush hour')
+        #ask user to select filter
+        filter_to_call = int(input('Enter number for filter you wish to add from above list: '))
+        #go through all filters offered and run the selected one
+        if filter_to_call == 1:
+            data = filter_start_day(data)
+        elif filter_to_call == 2:
+            data = start_year_filter(data)
+        elif filter_to_call == 3:
+            data = end_year_filter(data)
+        elif filter_to_call == 4:
+            data = start_hour_filter(data)
+        elif filter_to_call == 5:
+            data = end_hour_filter(data)
+        elif filter_to_call == 6:
+            data = start_station_filter(data)
+        elif filter_to_call == 7:
+            data = end_station_filter(data)
+        elif filter_to_call == 8:
+            data = start_area_filter(data)
+        elif filter_to_call == 9:
+            data = end_area_filter(data)
+        elif filter_to_call == 10:
+            data = rush_hour_filter(data)
+        else:
+            #inform user that chosen filter does not exist
+            print('Invalid filter entered\nAttempt to enter filter again\n\n')
+            #reduce a by 1 so that the user has another attempt to use this filter
+            a = a - 1
+    return data
