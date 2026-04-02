@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr  2 21:00:05 2026
-
-@author: fraserwilkie
-"""
 
 def print_filtered_data(data):
     print("\n========== PROCESSED DATA ==========\n")
