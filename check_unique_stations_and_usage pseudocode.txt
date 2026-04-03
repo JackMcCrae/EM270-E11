@@ -1,0 +1,44 @@
+check_unique_stations_and_station_usage_frequency
+
+check if first start station and first end station are not the same
+	record both in array of stations
+	set array of times each station started at to begin 1,0
+	set array of times each station ended at to begin 0,1
+otherwise
+	record just the start station in array of stations
+	set array of times each station started at to begin 1
+	set array of times each station ended at to begin 1
+loop through every data entry beginning at the second
+	set counters for if start and end stations match and existing station to false
+	loop through array of visited stations
+		check if current station in array of stations is equal to the start station of current data entry
+			change variable tracking if start station has been visited before to true
+			increment the number of times this station has been started at
+		check if current station in array of stations is equal to the end station of current data entry
+			change variable tracking if end station has been visited before to true
+			increment the number of times this station has been ended at
+		check if start station and end station have been visited before using the variables tracking that
+			break out of stations loop
+	check if start station was not a match for any visited stations and end station was
+		append start station to array of stations
+		append 1 to the times each station has been started at
+		append 0 to the times each station has been ended at
+	otherwise check if start station was a match for any visited stations and end station was not
+		append end station to array of stations
+		append 0 to the times each station has been started at
+		append 1 to the times each station has been ended at
+	otherwise check if start station was not a match for any previous station and end station as not a match for any previous stations
+		check if start station is the same as end station
+			append start station to array of stations
+			append 1 to array of times each station was started at
+			append 1 to array of times each station was ended at
+		otherwise
+			append start station to array of stations
+			append end station to array of stations
+			append 1,0 to array of times each station was started at
+			append 0,1 to array of times each station was ended at
+get total visits to each station by adding array of times each station was started at to array of times each station was ended at
+set an array of end stations and the array of times each station was ended at to the output of a sort parallel arrays function where the inputs are the array of stations and the number of times each station as ended at
+set an array of start stations and the array of times each station was started at to the output of a sort parallel arrays function where the inputs are the array of stations and the number of times each station as started at
+
+return the number of stations, total visits to each station, array of stations, number of times each stations was started at, stations array sorted to match start station tally, number of times each station was ended at, stations sorted to match that
