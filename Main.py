@@ -797,5 +797,5 @@ pre_analysed_data = call_filters(remove_error_causing_entries(run_validation_che
 close_files()
 #call the print general data function with the output of the analyse filter data function ran with the pre analysed data
 print_general_data(analyse_filter_data(pre_analysed_data))
-#print station usage using the output of check station usage ran with the pre analysed data
+#print station usage using the output of check station usage ran with the pre analysed datab
 print_station_usage(check_unique_stations_and_station_usage_frequency(pre_analysed_data))
