@@ -194,7 +194,6 @@ def call_validations(current_entry):
 
     return(current_entry)
 
-
 def check_distance_lat_and_long(data):
     try:
         #find change in latitude and longitude from start and end latitude and logitdue in data
@@ -507,14 +506,14 @@ def check_unique_stations_and_station_usage_frequency(data):
     total_station_usage = start_station_usage + end_station_usage
 
     #sort stations by how many times they are the start station and save as it's own array, as well as number of times started at that station
-    start_stations, start_station_usage = bubble_sort_parallel_arrays(start_station_usage, stations)
+    start_stations, sorted_start_station_usage = bubble_sort_parallel_arrays(start_station_usage, stations)
     #sort stations by how many times they are the end station and save as it's own array, as well as number of times ended at that station
-    end_stations, end_station_usage = bubble_sort_parallel_arrays(end_station_usage, stations)
+    end_stations, sorted_end_station_usage = bubble_sort_parallel_arrays(end_station_usage, stations)
     
     
 
     #return array of stations visited, number of stations visited and the number of times each station was visited, all sorted
-    return len(stations), total_station_usage, stations, start_station_usage, start_stations, end_station_usage, end_stations
+    return [[len(stations)], total_station_usage, stations, sorted_start_station_usage, start_stations, sorted_end_station_usage, end_stations, start_station_usage, end_station_usage]
 
 def bubble_sort_parallel_arrays(number_array, info_array):
     #set boolean of if the array is sorted to false
@@ -592,7 +591,7 @@ def analyse_filter_data(data):
     #divide total distance by trip number for average trip duration
     average_trip_distance = total_trip_distance/total_journeys
     #return total journeys, minimum, maximum and total duration and minim, maximum and total distance
-    return total_journeys, minimum_trip_duration, maximum_trip_duration, average_trip_duration, maximum_trip_distance, maximum_trip_distance, average_trip_distance
+    return [total_journeys, minimum_trip_duration, maximum_trip_duration, average_trip_duration, minimum_trip_distance, maximum_trip_distance, average_trip_distance]
 
 def open_files():
     #make empty array for files
@@ -749,3 +748,54 @@ def call_filters(data):
             a = a - 1
     #return data after filters
     return data
+
+def print_general_data(data):
+    #print header
+    print('\n========== PROCESSED DATA ==========\n')
+
+    #print data from filters
+    print("Total Number of Journeys: ", data[0])
+    print("Minimum Journey Duration: ", data[1])
+    print("Maximum Journey Duration: ", data[2])
+    print("Average Journey Duration: ", data[3])
+    print("Miniimum Trip Distance: ", data[4])
+    print("Maxiimum Trip Distance: ", data[5])
+    print("Average Trip Distance:", data[6])
+    return
+
+def print_station_usage(data):
+    #print total number of stations
+    print('Total number of stations visited was:', data[0][0])
+    print('Most common starting stations where: ')
+    #loop three times
+    for a in range(0,3):
+        #print last position in array - loop we are on
+        print(data[4][len(data[4]-a)])
+    print('Most common end stations where: ')
+    #loop three times
+    for a in range(0,3):
+        #print last position in array - loop we are on
+        print(data[6][len(data[4])-a])
+    print()
+    #ask if user wants a file
+    if str(input('Write stations.csv y/n: ')) == 'y':
+        #open a csv
+        b = open('station_usage.cvs','w')
+        #write headers to a csv
+        b.write('Stations','Start','End')
+        #loop through all stations
+        for a in range(0,len(data[1])):
+            #print station, number of times started at this station and number of times ended at this station
+            b.write(data[1][a], data[7][a], data[8][a])
+        #close file
+        b.close()
+    return
+
+#set pre analysed data to the output of filters using the dataset with errors removed, using the validated data using parsed inputs from the open files function
+pre_analysed_data = call_filters(remove_error_causing_entries(run_validation_checks(parse_inputs(open_files()))))
+#close the files we opened
+close_files()
+#call the print general data function with the output of the analyse filter data function ran with the pre analysed data
+print_general_data(analyse_filter_data(pre_analysed_data))
+#print station usage using the output of check station usage ran with the pre analysed data
+print_station_usage(check_unique_stations_and_station_usage_frequency(pre_analysed_data))
