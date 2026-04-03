@@ -4,14 +4,14 @@ open_files
 		open file at location specified by user and append it to array of files
 	return array of files
 
+data = open_files()
 
-close_files
+close_files(files)
 	loop through array of files
 		close file at current position in array
 	return
 
-
-parse_inputs
+parse_inputs(file_array)
 	make empty array to hold all parsed data
 	loop through all files
 		loop through all lines in current file
@@ -27,7 +27,7 @@ parse_inputs
 	return all parsed data
 
 
-reformat_and_note_errors
+reformat_and_note_errors(current_entry, b)
 	attempt the following
 		remove any random apostrophes from the current entry
 		set temporary holder variables to empty arrays
@@ -53,7 +53,7 @@ reformat_and_note_errors
 		return current entry and that there was an error
 
 
-remove_random_apostrophe
+remove_random_apostrophe(data)
 	loop for number of data points in the entry
 		create an empty string
 		check if the first character of this data point is an apostrophe
@@ -63,14 +63,14 @@ remove_random_apostrophe
 	return the processed data
 
 
-run_validation_checks
+run_validation_checks(all_data)
 	loop through all data entries
 		check if this entry has already been marked as causing errors
 			put this entry through call validations and update it with the result
 	return data with validation marks applied
 
 
-call_validations
+call_validations(current_entry)
 	set dodgy data variable to false and append it to the current entry
 	set new error variable to false
 	call check distance lat and long on current entry
@@ -103,7 +103,7 @@ call_validations
 	return the updated entry
 
 
-check_distance_lat_and_long
+check_distance_lat_and_long(data)
 	attempt the following
 		find change in latitude by subtracting start latitude from end latitude
 		find change in longitude by subtracting start longitude from end longitude
@@ -115,7 +115,7 @@ check_distance_lat_and_long
 		return that data is dodgy and causes an error
 
 
-check_start_hour
+check_start_hour(data)
 	attempt the following
 		get hour from start date field
 		get hour from start hour field
@@ -126,7 +126,7 @@ check_start_hour
 		return that data is dodgy and causes an error
 
 
-check_start_month
+check_start_month(data)
 	attempt the following
 		check if the numeric month from the start date matches the month name in the start month field for each of the 12 months
 			if a match is found return that data is not dodgy and causes no error
@@ -135,7 +135,7 @@ check_start_month
 		return that data is dodgy and causes an error
 
 
-check_trip_duration
+check_trip_duration(data)
 	attempt the following
 		check if the start and end dates share the same day month and year
 			find trip start as seconds past midnight
@@ -168,7 +168,7 @@ check_trip_duration
 		return that data is dodgy and causes an error
 
 
-check_trip_category_with_duration
+check_trip_category_with_duration(data)
 	attempt the following
 		check if trip duration falls between the lower and upper bounds of the trip category
 			if it does return that data is not dodgy and causes no error
@@ -177,7 +177,7 @@ check_trip_category_with_duration
 		return that data is dodgy and causes an error
 
 
-check_if_weekend
+check_if_weekend(data)
 	attempt the following
 		check if day of week is saturday or sunday and the is weekend flag is not zero
 			return that data is not dodgy and causes no error
@@ -191,7 +191,7 @@ check_if_weekend
 		return that data is dodgy and causes an error
 
 
-check_end_date_is_after_start_date
+check_end_date_is_after_start_date(data)
 	attempt the following
 		check if end year is greater than start year
 			return that data is not dodgy and causes no error
@@ -223,7 +223,7 @@ check_end_date_is_after_start_date
 		return that data is dodgy and causes an error
 
 
-check_trip_time_speed_and_distance
+check_trip_time_speed_and_distance(data)
 	attempt the following
 		check if trip duration multiplied by speed is between 90% and 150% of the listed trip distance
 			if it is return that data is not dodgy and causes no error
@@ -232,7 +232,7 @@ check_trip_time_speed_and_distance
 		return that data is dodgy and causes an error
 
 
-check_date_exists
+check_date_exists(data)
 	attempt the following
 		check if start year or end year is zero as year zero does not exist
 			return that data is dodgy but causes no error
@@ -278,7 +278,7 @@ check_leap_year
 			return true as it is a leap year
 
 
-div_error_checker
+div_error_checker(numerator,denominator)
 	attempt the following
 		divide numerator by denominator
 		cast result to an integer, which will error if result is not a whole number
@@ -287,7 +287,7 @@ div_error_checker
 		return true to indicate an error and that numerator is not a multiple of denominator
 
 
-remove_error_causing_entries
+remove_error_causing_entries(data)
 	store the initial length of the data array
 	loop for the initial number of items in the array going backwards through it
 		check if this entry has been marked as causing an error
@@ -295,7 +295,7 @@ remove_error_causing_entries
 	return the data without error causing entries
 
 
-check_unique_stations_and_station_usage_frequency
+check_unique_stations_and_station_usage_frequency(data)
 	check if first start station and first end station are not the same
 		record both in array of stations
 		set array of times each station started at to begin 1, 0
@@ -338,7 +338,7 @@ check_unique_stations_and_station_usage_frequency
 	return the number of stations, total visits to each station, array of stations, number of times each station was started at, stations array sorted to match start station tally, number of times each station was ended at, stations sorted to match that
 
 
-bubble_sort_parallel_arrays
+bubble_sort_parallel_arrays(number_array, info_array)
 	set boolean tracking if the array is sorted to false
 	while array is not sorted
 		set sorted boolean to true
@@ -350,7 +350,7 @@ bubble_sort_parallel_arrays
 	return the sorted info array and the sorted number array
 
 
-analyse_filter_data
+analyse_filter_data(data)
 	set total journeys to the number of data entries
 	set minimum trip duration to the first duration entry
 	set maximum trip duration to the first duration entry
@@ -374,7 +374,7 @@ analyse_filter_data
 	return total journeys, minimum duration, maximum duration, average duration, minimum distance, maximum distance, average distance
 
 
-filter_start_day
+filter_start_day(data)
 	make empty array for filtered data
 	get day to filter for from user
 	loop through all data entries
@@ -383,7 +383,7 @@ filter_start_day
 	return the filtered data
 
 
-call_filters
+call_filters(data)
 	ask user how many filters to apply
 	loop for the number of filters the user wishes to apply
 		print list of available filters
@@ -394,7 +394,7 @@ call_filters
 	return the filtered data
 
 
-start_year_filter
+start_year_filter(data)
 	store the initial length of the data array
 	ask user for a year to filter for
 	loop through all data entries going backwards
@@ -403,7 +403,7 @@ start_year_filter
 	return the filtered data
 
 
-end_year_filter
+end_year_filter(data)
 	store the initial length of the data array
 	ask user for a year to filter for
 	loop through all data entries going backwards
@@ -412,7 +412,7 @@ end_year_filter
 	return the filtered data
 
 
-start_station_filter
+start_station_filter(data)
 	store the initial length of the data array
 	ask user for a station name to filter by
 	loop through all data entries going backwards
@@ -421,7 +421,7 @@ start_station_filter
 	return the filtered data
 
 
-end_station_filter
+end_station_filter(data)
 	store the initial length of the data array
 	ask user for a station name to filter by
 	loop through all data entries going backwards
@@ -430,7 +430,7 @@ end_station_filter
 	return the filtered data
 
 
-rush_hour_filter
+rush_hour_filter(data)
 	store the initial length of the data array
 	ask user to filter for during rush hour or not during rush hour
 	loop through all data entries going backwards
@@ -439,7 +439,7 @@ rush_hour_filter
 	return the filtered data
 
 
-start_area_filter
+start_area_filter(data)
 	store the initial length of the data array
 	ask user for an area name to filter by
 	loop through all data entries going backwards
@@ -448,7 +448,7 @@ start_area_filter
 	return the filtered data
 
 
-end_area_filter
+end_area_filter(data)
 	store the initial length of the data array
 	ask user for an area name to filter by
 	loop through all data entries going backwards
@@ -457,7 +457,7 @@ end_area_filter
 	return the filtered data
 
 
-start_hour_filter
+start_hour_filter(data)
 	store the initial length of the data array
 	ask user for an hour to filter by
 	loop through all data entries going backwards
@@ -466,7 +466,7 @@ start_hour_filter
 	return the filtered data
 
 
-end_hour_filter
+end_hour_filter(data)
 	store the initial length of the data array
 	ask user for an hour to filter by
 	loop through all data entries going backwards
@@ -474,7 +474,7 @@ end_hour_filter
 			remove this entry from the array
 	return the filtered data
 
-call_filters
+call_filters(data)
 	obtain number of fliters required as an integer
 	loop through list until required number of filters are selected
 		display available filters selectable by number
@@ -484,7 +484,7 @@ call_filters
 			reduce number of attempts by 1
 	return filtered data
 
-print_general_data
+print_general_data(data)
 	display string as data header
 
 	display total number of journeys from 1st element of filtered data
@@ -496,7 +496,7 @@ print_general_data
 	display average trip distance from 7th element of filtered data
 	return the function
 
-print_station_usage
+print_station_usage(data)
 	display total number of stations visited from 1st element within the 1st element of filtered data
 	display string heading most common starting stations
 	loop common starting stations
