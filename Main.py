@@ -12,19 +12,19 @@ def parse_inputs(file_array):
     #loop through each data entry
     for a in len(parsed_data):
         #initially say this entry is valid
-        overall_valid = True
+        causes_errror = False
         #loop through each field in this data entry
         for b in len(parsed_data[a]):
             #check if this data needs broken down further and if it will cause errors from this knowledge
             checked_value, valid_value = reformat_and_note_errors(parsed_data[a][b], b)
             #check if this section has caused errors, if so update if this data entry overall causes errors
             if valid_value == False:
-                overall_valid == False
+                causes_errror == True
             #add the seperated data to the array in place of original data
             parsed_data[a][b] = checked_value
         #add section to data entry for if data causes errors, this will continually be updated
-        is_valid = [overall_valid]
-        parsed_data[a].append(is_valid)
+        is_invalid = [causes_errror]
+        parsed_data[a].append(is_invalid)
     #return all the seperated values & if they cause errors
     return parsed_data
 

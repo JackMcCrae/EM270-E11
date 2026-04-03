@@ -17,13 +17,13 @@ parse_inputs
 		loop through all lines in current file
 			split line at commas and append resulting array to parsed data array
 	loop through each data entry
-		set variable tracking if this entry is overall valid to true
+		set variable tracking if this entry causes an error to false
 		loop through each field in this data entry
 			call reformat and note errors on this field, saving returned value and validity
-			check if this field was marked as invalid
-				update overall validity variable to false
+			check if this field was marked as causing an error
+				update overall error variable to True
 			replace original field data with the reformatted value
-		append overall validity as its own section to this data entry
+		append overall erorr as its own section to this data entry
 	return all parsed data
 
 
