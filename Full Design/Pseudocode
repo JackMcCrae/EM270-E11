@@ -484,4 +484,39 @@ call_filters
 			reduce number of attempts by 1
 	return filtered data
 
+print_general_data
+	display string as data header
+
+	display total number of journeys from 1st element of filtered data
+	display minimum journey duration from 2nd element of filtered data
+	display maximum journey duration from 3rd element of filtered data
+	display average journey duration from 4th element of filtered data
+	display minimum trip distance from 5th element of filtered data
+	display maximum trip distance from 6th element of filtered data
+	display average trip distance from 7th element of filtered data
+	return the function
+
+print_station_usage
+	display total number of stations visited from 1st element within the 1st element of filtered data
+	display string heading most common starting stations
+	loop common starting stations
+		display common starting stations from element 4 of filtered data 
+	display string heading most common end stations
+	loop common end stations
+		display common end stations from element 6 of filtered data
+	ask to create .csv file
+	if string input is 'y'
+		open .csv filte
+		write headers to .csv file
+		loop through data entries to write to .csv file
+		close .csv file
+	return the function
+	
+
+		
+
+
+
+
+
 		
