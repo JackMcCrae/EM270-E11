@@ -747,4 +747,5 @@ def call_filters(data):
             print('Invalid filter entered\nAttempt to enter filter again\n\n')
             #reduce a by 1 so that the user has another attempt to use this filter
             a = a - 1
+    #return data after filters
     return data
