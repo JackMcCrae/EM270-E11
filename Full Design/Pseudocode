@@ -473,3 +473,15 @@ end_hour_filter
 		check if the end hour of this entry does not match the chosen hour
 			remove this entry from the array
 	return the filtered data
+
+call_filters
+	obtain number of fliters required as an integer
+	display available filters selectable by number
+		obtain filter selection number as an integer
+	loop through list until required number of filters are selected
+		if filter selection is invalid
+			display error message and continue loop
+			reduce number of attempts by 1
+	return filtered data
+
+		
