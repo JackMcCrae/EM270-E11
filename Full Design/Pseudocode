@@ -1,0 +1,475 @@
+open_files
+	make empty array for files
+	loop for a number of times specified by user
+		open file at location specified by user and append it to array of files
+	return array of files
+
+
+close_files
+	loop through array of files
+		close file at current position in array
+	return
+
+
+parse_inputs
+	make empty array to hold all parsed data
+	loop through all files
+		loop through all lines in current file
+			split line at commas and append resulting array to parsed data array
+	loop through each data entry
+		set variable tracking if this entry is overall valid to true
+		loop through each field in this data entry
+			call reformat and note errors on this field, saving returned value and validity
+			check if this field was marked as invalid
+				update overall validity variable to false
+			replace original field data with the reformatted value
+		append overall validity as its own section to this data entry
+	return all parsed data
+
+
+reformat_and_note_errors
+	attempt the following
+		remove any random apostrophes from the current entry
+		set temporary holder variables to empty arrays
+		check if field index is for a start date or end date
+			split entry at a space to separate date and time
+			split date section at forward slash to get day month and year
+			split time section at colon to get hour minute and second
+			combine day month year hour minute and second into a single array
+			set current entry to that combined array
+		otherwise check if field index is for a start station or end station
+			split entry at comma to separate station name and area
+		otherwise check if field index is for the trip category
+			split at open bracket to separate category label from time range
+			split right portion at hyphen to isolate lower time bound
+			split that result at close bracket to isolate upper time bound
+			combine category label, lower bound, and upper bound into an array
+			set current entry to that array
+		otherwise
+			wrap current entry in an array
+		return current entry and that there were no errors
+	run if any error occurred
+		wrap current entry in an array unchanged
+		return current entry and that there was an error
+
+
+remove_random_apostrophe
+	loop for number of data points in the entry
+		create an empty string
+		check if the first character of this data point is an apostrophe
+			loop through every character in this data point except the first
+				concatenate current character onto the new string
+			replace this data point with the new string without the apostrophe
+	return the processed data
+
+
+run_validation_checks
+	loop through all data entries
+		check if this entry has already been marked as causing errors
+			put this entry through call validations and update it with the result
+	return data with validation marks applied
+
+
+call_validations
+	set dodgy data variable to false and append it to the current entry
+	set new error variable to false
+	call check distance lat and long on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	call check start hour on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	call check start month on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	call check trip duration on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	call check trip category with duration on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	call check if weekend on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	call check end date is after start date on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	call check trip time speed and distance on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	call check date exists on current entry
+		if a new error was found update error field in entry
+		if data was found to be dodgy update dodgy field in entry
+	return the updated entry
+
+
+check_distance_lat_and_long
+	attempt the following
+		find change in latitude by subtracting start latitude from end latitude
+		find change in longitude by subtracting start longitude from end longitude
+		use haversine formula to calculate distance from latitude longitude and earth radius
+		check if the distance in the data is between 90% and 150% of the calculated haversine distance
+			if it is return that data is not dodgy and causes no error
+			otherwise return that data is dodgy but causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_start_hour
+	attempt the following
+		get hour from start date field
+		get hour from start hour field
+		check if both hours match
+			return that data is not dodgy and causes no error
+			otherwise return that data is dodgy but causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_start_month
+	attempt the following
+		check if the numeric month from the start date matches the month name in the start month field for each of the 12 months
+			if a match is found return that data is not dodgy and causes no error
+		if no months matched return that data is dodgy but causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_trip_duration
+	attempt the following
+		check if the start and end dates share the same day month and year
+			find trip start as seconds past midnight
+			find trip end as seconds past midnight
+			find duration as the difference between end and start
+			convert duration to minutes and check if it is within 10% of the listed duration
+				if it is return that data is not dodgy and causes no error
+				otherwise return that data is dodgy but causes no error
+		otherwise check if start and end share the same month and year
+			find the difference in days and convert it to seconds
+			find start time in seconds past midnight
+			find end time in seconds past midnight offset by the day difference
+			calculate duration from those times
+			convert to minutes and check if within 10% of listed duration
+				if it is return that data is not dodgy and causes no error
+				otherwise return that data is dodgy but causes no error
+		otherwise check if start and end share the same year
+			check if start month is april june september or november
+				calculate time change using a 30 day month length in seconds
+			otherwise check if start month is february
+				call check leap year on the start date field
+					if it is a leap year use a 29 day month length in seconds
+					otherwise use a 28 day month length in seconds
+			otherwise
+				use a 31 day month length in seconds
+			convert duration to minutes and check if it is within 10% of listed duration
+				if it is return that data is not dodgy and causes no error
+				otherwise return that data is dodgy but causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_trip_category_with_duration
+	attempt the following
+		check if trip duration falls between the lower and upper bounds of the trip category
+			if it does return that data is not dodgy and causes no error
+			otherwise return that data is dodgy but causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_if_weekend
+	attempt the following
+		check if day of week is saturday or sunday and the is weekend flag is not zero
+			return that data is not dodgy and causes no error
+		otherwise check if day of week is saturday or sunday and the is weekend flag is zero
+			return that data is dodgy but causes no error
+		otherwise check if the is weekend flag is not zero
+			return that data is dodgy but causes no error
+		otherwise
+			return that data is not dodgy and causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_end_date_is_after_start_date
+	attempt the following
+		check if end year is greater than start year
+			return that data is not dodgy and causes no error
+		otherwise check if end year is less than start year
+			return that data is dodgy but causes no error
+		otherwise check if end month is greater than start month
+			return that data is not dodgy and causes no error
+		otherwise check if end month is less than start month
+			return that data is dodgy but causes no error
+		otherwise check if end day is greater than start day
+			return that data is not dodgy and causes no error
+		otherwise check if end day is less than start day
+			return that data is dodgy but causes no error
+		otherwise check if end hour is greater than start hour
+			return that data is not dodgy and causes no error
+		otherwise check if end hour is less than start hour
+			return that data is dodgy but causes no error
+		otherwise check if end minute is greater than start minute
+			return that data is not dodgy and causes no error
+		otherwise check if end minute is less than start minute
+			return that data is dodgy but causes no error
+		otherwise check if end second is greater than start second
+			return that data is not dodgy and causes no error
+		otherwise check if end second is less than start second
+			return that data is dodgy but causes no error
+		otherwise the start and end times are identical
+			return that data is dodgy but causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_trip_time_speed_and_distance
+	attempt the following
+		check if trip duration multiplied by speed is between 90% and 150% of the listed trip distance
+			if it is return that data is not dodgy and causes no error
+			otherwise return that data is dodgy but causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_date_exists
+	attempt the following
+		check if start year or end year is zero as year zero does not exist
+			return that data is dodgy but causes no error
+		otherwise check if start and end months are both between 1 and 12 inclusive
+			return that data is not dodgy and causes no error
+		otherwise check if start month is april june september or november
+			check if start day is less than 1 or greater than 30
+				return that data is dodgy but causes no error
+		otherwise check if end month is april june september or november
+			check if end day is less than 1 or greater than 30
+				return that data is dodgy but causes no error
+		otherwise check if start or end month is february and the day is outside the range of 1 to 29
+			return that data is dodgy but causes no error
+		otherwise check if start day is the 29th of february
+			call check leap year on the start date field
+				if it is not a leap year return that data is dodgy but causes no error
+		otherwise check if end day is the 29th of february
+			call check leap year on the end date field
+				if it is not a leap year return that data is dodgy but causes no error
+		otherwise check if either start or end day is less than 1 or greater than 31
+			return that data is dodgy but causes no error
+		otherwise
+			return that data is not dodgy and causes no error
+	run if any error occurred
+		return that data is dodgy and causes an error
+
+
+check_leap_year
+	check if the year in the given date field is greater than zero
+		check if year is not a multiple of 4 using div error checker
+			return false as it is not a leap year
+		otherwise check if year is not a multiple of 100
+			return true as it is a leap year
+		otherwise check if year is a multiple of 400
+			return true as it is a leap year
+	otherwise year is before year 1 CE so add 1 to compensate for missing year zero
+		print a message noting the unusual year
+		check if year plus one is not a multiple of 4 using div error checker
+			return false as it is not a leap year
+		otherwise check if year plus one is not a multiple of 100
+			return true as it is a leap year
+		otherwise check if year plus one is a multiple of 400
+			return true as it is a leap year
+
+
+div_error_checker
+	attempt the following
+		divide numerator by denominator
+		cast result to an integer, which will error if result is not a whole number
+		return false to indicate no error and that numerator is a multiple of denominator
+	run if any error occurred
+		return true to indicate an error and that numerator is not a multiple of denominator
+
+
+remove_error_causing_entries
+	store the initial length of the data array
+	loop for the initial number of items in the array going backwards through it
+		check if this entry has been marked as causing an error
+			remove this entry from the array
+	return the data without error causing entries
+
+
+check_unique_stations_and_station_usage_frequency
+	check if first start station and first end station are not the same
+		record both in array of stations
+		set array of times each station started at to begin 1, 0
+		set array of times each station ended at to begin 0, 1
+	otherwise
+		record just the start station in array of stations
+		set array of times each station started at to begin 1
+		set array of times each station ended at to begin 1
+	loop through every data entry beginning at the second
+		set counters for if start and end stations match any existing station to false
+		loop through array of visited stations
+			check if current station in array of stations is equal to the start station of current data entry
+				change variable tracking if start station has been visited before to true
+				increment the number of times this station has been started at
+			check if current station in array of stations is equal to the end station of current data entry
+				change variable tracking if end station has been visited before to true
+				increment the number of times this station has been ended at
+			check if start station and end station have both been visited before using the variables tracking that
+				break out of stations loop
+		check if start station was not a match for any visited stations and end station was
+			append start station to array of stations
+			append 1 to the times each station has been started at
+			append 0 to the times each station has been ended at
+		otherwise check if start station was a match for any visited stations and end station was not
+			append end station to array of stations
+			append 0 to the times each station has been started at
+			append 1 to the times each station has been ended at
+		otherwise check if start station was not a match and end station was not a match
+			check if start station is the same as end station
+				append start station to array of stations
+				append 1 to array of times each station was started at
+				append 1 to array of times each station was ended at
+			otherwise
+				append start station and end station to array of stations
+				append 1, 0 to array of times each station was started at
+				append 0, 1 to array of times each station was ended at
+	get total visits to each station by adding array of times started at to array of times ended at
+	set an array of end stations and the array of times each station was ended at to the output of a sort parallel arrays function where the inputs are the array of stations and the number of times each station was ended at
+	set an array of start stations and the array of times each station was started at to the output of a sort parallel arrays function where the inputs are the array of stations and the number of times each station was started at
+	return the number of stations, total visits to each station, array of stations, number of times each station was started at, stations array sorted to match start station tally, number of times each station was ended at, stations sorted to match that
+
+
+bubble_sort_parallel_arrays
+	set boolean tracking if the array is sorted to false
+	while array is not sorted
+		set sorted boolean to true
+		loop through the number array up to the second to last element
+			check if the value at the current position is greater than the next value
+				swap current and next values in the number array
+				swap current and next values in the info array
+				set sorted boolean to false
+	return the sorted info array and the sorted number array
+
+
+analyse_filter_data
+	set total journeys to the number of data entries
+	set minimum trip duration to the first duration entry
+	set maximum trip duration to the first duration entry
+	set total trip duration to the first duration entry
+	set minimum trip distance to the first distance entry
+	set maximum trip distance to the first distance entry
+	set total trip distance to the first distance entry
+	loop through every trip entry after the first
+		check if this duration is less than the current minimum
+			update minimum trip duration
+		otherwise check if this duration is greater than the current maximum
+			update maximum trip duration
+		check if this distance is less than the current minimum
+			update minimum trip distance
+		otherwise check if this distance is greater than the current maximum
+			update maximum trip distance
+		add this duration to the total trip duration
+		add this distance to the total trip distance
+	divide total duration by total journeys to find average trip duration
+	divide total distance by total journeys to find average trip distance
+	return total journeys, minimum duration, maximum duration, average duration, minimum distance, maximum distance, average distance
+
+
+filter_start_day
+	make empty array for filtered data
+	get day to filter for from user
+	loop through all data entries
+		check if the day of week in this entry matches the chosen day ignoring case
+			append this entry to the filtered data array
+	return the filtered data
+
+
+call_filters
+	ask user how many filters to apply
+	loop for the number of filters the user wishes to apply
+		print list of available filters
+		ask user to select a filter by number
+		check which filter was selected and call the corresponding filter function on the data
+		if an invalid filter number was entered
+			inform the user and reduce the loop counter by one to give another attempt
+	return the filtered data
+
+
+start_year_filter
+	store the initial length of the data array
+	ask user for a year to filter for
+	loop through all data entries going backwards
+		check if the start year of this entry does not match the chosen year
+			remove this entry from the array
+	return the filtered data
+
+
+end_year_filter
+	store the initial length of the data array
+	ask user for a year to filter for
+	loop through all data entries going backwards
+		check if the end year of this entry does not match the chosen year
+			remove this entry from the array
+	return the filtered data
+
+
+start_station_filter
+	store the initial length of the data array
+	ask user for a station name to filter by
+	loop through all data entries going backwards
+		check if the start station of this entry does not match the chosen station
+			remove this entry from the array
+	return the filtered data
+
+
+end_station_filter
+	store the initial length of the data array
+	ask user for a station name to filter by
+	loop through all data entries going backwards
+		check if the end station of this entry does not match the chosen station
+			remove this entry from the array
+	return the filtered data
+
+
+rush_hour_filter
+	store the initial length of the data array
+	ask user to filter for during rush hour or not during rush hour
+	loop through all data entries going backwards
+		check if entry is during rush hour and filter is for not rush hour, or vice versa
+			remove this entry from the array
+	return the filtered data
+
+
+start_area_filter
+	store the initial length of the data array
+	ask user for an area name to filter by
+	loop through all data entries going backwards
+		check if the start area of this entry does not match the chosen area
+			remove this entry from the array
+	return the filtered data
+
+
+end_area_filter
+	store the initial length of the data array
+	ask user for an area name to filter by
+	loop through all data entries going backwards
+		check if the end area of this entry does not match the chosen area
+			remove this entry from the array
+	return the filtered data
+
+
+start_hour_filter
+	store the initial length of the data array
+	ask user for an hour to filter by
+	loop through all data entries going backwards
+		check if the start hour of this entry does not match the chosen hour
+			remove this entry from the array
+	return the filtered data
+
+
+end_hour_filter
+	store the initial length of the data array
+	ask user for an hour to filter by
+	loop through all data entries going backwards
+		check if the end hour of this entry does not match the chosen hour
+			remove this entry from the array
+	return the filtered data
