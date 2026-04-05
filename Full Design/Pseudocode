@@ -534,11 +534,3 @@ set pre_analysed_data to equal call_filters(remove_error_causing_entries(run_val
 close opened files
 call print data function to output analyse_filter_data and pre_analysed_data
 print station usage data function to output check_unique_stations_and_station_usage_frequency and pre_analysed_data
-
-		
-
-
-
-
-
-		
