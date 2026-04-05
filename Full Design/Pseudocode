@@ -472,6 +472,26 @@ end_hour_filter
 			remove this entry from the array
 	return the filtered data
 
+duration_range_filter(data)
+    store the initial length of the data array
+    ask user for a minimum trip duration in minutes
+    ask user for a maximum trip duration in minutes
+    loop through all data entries going backwards
+        check if the trip duration is less than the minimum
+            OR greater than the maximum
+                remove this entry from the array
+    return the filtered data
+
+weekend_filter(data)
+    store the initial length of the data array
+    ask user to filter for weekend trips (w) or weekday trips (wd)
+    loop through all data entries going backwards
+        check if is_weekend flag is non-zero and filter is for weekdays
+            remove this entry from the array
+        otherwise check if is_weekend flag is zero and filter is for weekends
+            remove this entry from the array
+    return the filtered data
+
 call_filters
 	obtain number of fliters required as an integer
 	loop through list until required number of filters are selected
