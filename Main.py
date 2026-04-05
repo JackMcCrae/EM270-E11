@@ -711,6 +711,28 @@ def end_hour_filter(data):
             data.pop[b-a]
     return data
 
+def duration_range_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    min_duration = float(input('Enter minimum trip duration in minutes: '))
+    max_duration = float(input('Enter maximum trip duration in minutes: '))
+    for a in range(0, b):
+        if float(data[b-a][6][0]) < min_duration or \
+           float(data[b-a][6][0]) > max_duration:
+            data.pop(b-a)
+    return data
+
+def weekend_filter(data):
+    #look at start year filter for explanation of how filters work
+    b = len(data)
+    choice = str(input('Filter for weekend (w) or weekday (wd) trips: '))
+    for a in range(0, b):
+        if int(data[b-a][12][0]) != 0 and choice.lower() == 'wd':
+            data.pop(b-a)
+        elif int(data[b-a][12][0]) == 0 and choice.lower() == 'w':
+            data.pop(b-a)
+    return data
+
 def call_filters(data):
     #ask user how many filters to apply
     number_of_filters = int(input('How many filters do you want to add: '))
@@ -741,6 +763,10 @@ def call_filters(data):
             data = end_area_filter(data)
         elif filter_to_call == 10:
             data = rush_hour_filter(data)
+        elif filter_to_call == 11: 
+            data = duration_range_filter(data
+        elif filter_to_call == 12: 
+            data = weekend_filter(data)
         else:
             #inform user that chosen filter does not exist
             print('Invalid filter entered\nAttempt to enter filter again\n\n')
