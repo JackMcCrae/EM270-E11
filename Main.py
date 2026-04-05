@@ -717,8 +717,7 @@ def duration_range_filter(data):
     min_duration = float(input('Enter minimum trip duration in minutes: '))
     max_duration = float(input('Enter maximum trip duration in minutes: '))
     for a in range(0, b):
-        if float(data[b-a][6][0]) < min_duration or \
-           float(data[b-a][6][0]) > max_duration:
+        if float(data[b-a][6][0]) < min_duration or float(data[b-a][6][0]) > max_duration:
             data.pop(b-a)
     return data
 
@@ -739,7 +738,7 @@ def call_filters(data):
     #loop for number of filters the user wishes to implement
     for a in range(0,number_of_filters):
         #print list of filters available
-        print('Available filters:\n1 : filter by day of week\n2 : filter by start year\n3 : filter by end year\n4 : filter by start hour\n5 : filter by end hour\n6 : filter by start station\n7 : filter by end station\n8 : filter by start area\n9 : filter by end area\n10 : filter by rush hour')
+        print('Available filters:\n1 : filter by day of week\n2 : filter by start year\n3 : filter by end year\n4 : filter by start hour\n5 : filter by end hour\n6 : filter by start station\n7 : filter by end station\n8 : filter by start area\n9 : filter by end area\n10 : filter by rush hour\n11 : filter by duration\n12 : filter by weekend')
         #ask user to select filter
         filter_to_call = int(input('Enter number for filter you wish to add from above list: '))
         #go through all filters offered and run the selected one
@@ -764,7 +763,7 @@ def call_filters(data):
         elif filter_to_call == 10:
             data = rush_hour_filter(data)
         elif filter_to_call == 11: 
-            data = duration_range_filter(data
+            data = duration_range_filter(data)
         elif filter_to_call == 12: 
             data = weekend_filter(data)
         else:
