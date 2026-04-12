@@ -734,7 +734,9 @@ def weekend_filter(data):
 
 def call_filters(data):
     #ask user how many filters to apply
-    number_of_filters = int(input('How many filters do you want to add: '))
+    number_of_filters = int(input('How many filters do you want to add(integer): '))
+    while number_of_filters < 0:
+        number_of_filters = int(input('Enter a number greater than 0: '))
     #loop for number of filters the user wishes to implement
     for a in range(0,number_of_filters):
         #print list of filters available
