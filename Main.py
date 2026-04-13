@@ -7,14 +7,26 @@ def parse_inputs(file_array):
     for a in file_array:
         #loop through lines in file
         for b in a:
-            #append array of all data in this line to array of entries
-            parsed_data.append(b.split(','))
+            #make sure this is not a header line
+            if b[0] != 's':
+                #append array of all data in this line to array of entries
+                parsed_data.append(b.split(','))
+    #rejoin start station and start area entries and make sure no other wird stuff is going on with more commas in a cell
+    for a in range(0,len(parsed_data)):
+        while '/' not in parsed_data[a][2]:
+            parsed_data[a][1] = parsed_data[a][1]+','+parsed_data[a][2]
+            parsed_data[a].pop(2)
+        while '-' not in parsed_data[a][7]:
+            parsed_data[a][4] = parsed_data[a][4]+','+parsed_data[a][5]
+            parsed_data[a].pop(4) 
+        parsed_data[a][1] = parsed_data[a][1].replace('"','')
+        parsed_data[a][3] = parsed_data[a][3].replace('"','')
     #loop through each data entry
-    for a in len(parsed_data):
+    for a in range(0,len(parsed_data)):
         #initially say this entry is valid
         causes_errror = False
         #loop through each field in this data entry
-        for b in len(parsed_data[a]):
+        for b in range(0,len(parsed_data[a])):
             #check if this data needs broken down further and if it will cause errors from this knowledge
             checked_value, valid_value = reformat_and_note_errors(parsed_data[a][b], b)
             #check if this section has caused errors, if so update if this data entry overall causes errors
@@ -25,19 +37,19 @@ def parse_inputs(file_array):
         #add section to data entry for if data causes errors, this will continually be updated
         is_invalid = [causes_errror]
         parsed_data[a].append(is_invalid)
+    #close the files we opened
+    close_files(file_array)
     #return all the seperated values & if they cause errors
     return parsed_data
 
 def run_validation_checks(all_data):
     #loop through all data values
     for a in range(0,len(all_data)):
-        #check if data has already been shown to cause problems
-        if all_data[a][23] == False:
-            #put current data value through validation checker
-            all_data[a] = call_validations(all_data[a])
+        #put current data value through validation checker
+        all_data[a] = call_validations(all_data[a])
     #return data with error and validation marks
     return(all_data)
-            
+
 def reformat_and_note_errors(current_entry, b):
     #attempt to break down certain data points for later use, if an error occurs return that this section is a problem
     try:
@@ -56,12 +68,15 @@ def reformat_and_note_errors(current_entry, b):
             holder_b = holder_a[0].split('/')
             #break time into hour minute and second
             holder_c = holder_a[1].split(':')
+            #plenty of records don't include seconds, so we add 00 to the seconds field if so
+            if len(holder_c) == 2:
+                holder_c.append('00')
             #add date to temporary variable
-            for n in range(0,2):
-                holder_d[n] = holder_b[n]
+            for n in range(0,3):
+                holder_d.append(holder_b[n])
             #add on time to temporary variable
-            for n in range(3,5):
-                holder_d[n] = holder_c[n-3]
+            for n in range(0,3):
+                holder_d.append(holder_c[n])
             #set value to be returned to value found
             current_entry = holder_d
         #check if data is in start station or end station section
@@ -76,6 +91,7 @@ def reformat_and_note_errors(current_entry, b):
             holder_b = holder_a[1].split('-')
             #split at ) to isolate upper time bound
             holder_c = holder_b[1].split(')')
+            holder_c = holder_c[0].split(' ')
             #put together array of this data to be returned
             holder_d = [holder_a[0],holder_b[0],holder_c[0]]
             #set array that is returned = to final temperoary array
@@ -140,6 +156,7 @@ def div_error_checker(numerator,denominator):
         return True
 
 def call_validations(current_entry):
+    error_message = ''
     #variable for if data is weird
     dodgy_data = False
     current_entry.append(dodgy_data)
@@ -148,50 +165,59 @@ def call_validations(current_entry):
     #checks to run on data. All functions are named as what they will do
     dodgy_data, new_error = check_distance_lat_and_long(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'change in latitude and longitude does not match distance,'
     dodgy_data, new_error = check_start_hour(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'inconsistency in start hour,'
     dodgy_data, new_error = check_start_month(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'inconsistency in start month,'
     dodgy_data, new_error = check_trip_duration(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'inconsistency in trip duration,'
     dodgy_data, new_error = check_trip_category_with_duration(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'inconsistency in trip duration,'
     dodgy_data, new_error = check_if_weekend(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'inconsistency in weekend or not,'
     dodgy_data, new_error = check_end_date_is_after_start_date(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'start date after end date,'
     dodgy_data, new_error = check_trip_time_speed_and_distance(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'speed time and distance do not match'
     dodgy_data, new_error = check_date_exists(current_entry)
     if new_error == True:
-        current_entry[23] = new_error
+        current_entry[23] = [new_error]
     if dodgy_data == True:
-        current_entry[24] = dodgy_data
-
+        current_entry[24] = [dodgy_data]
+        error_message = error_message+'issue with date,'
+    current_entry.append([error_message])
     return(current_entry)
 
 def check_distance_lat_and_long(data):
@@ -200,7 +226,7 @@ def check_distance_lat_and_long(data):
         delta_lat = float(data[19][0]) - float(data[17][0])
         delta_long = float(data[20][0]) - float(data[18][0])
         #use havesine formula to find distance around the earth based on these, then check it is >0.9 times the distance and <1.5 times it
-        if float(data[21][0]) >= 0.9*6371*2*math.asin(((math.sin(delta_lat/2)**2)+(math.cos(float(data[17][0]))*math.cos(float(data[19][0]))*(math.sin(delta_long/2))**2))**0.5) and float(data[21][0]) <= 1.5*6371*2*math.asin(((math.sin(delta_lat/2)**2)+(math.cos(data[17][0])*math.cos(data[19][0])*(math.sin(delta_long/2))**2))**0.5):
+        if float(data[21][0]) >= 0.9*2 * 6371 * math.asin(math.sqrt(math.sin(math.radians(delta_lat)/2)**2 + math.cos(math.radians(float(data[17][0]))) * math.cos(math.radians(float(data[17][0]) + math.radians(delta_lat))) * math.sin(math.radians(delta_long)/2)**2)) and float(data[21][0]) <= 1.5*2 * 6371 * math.asin(math.sqrt(math.sin(math.radians(delta_lat)/2)**2 + math.cos(math.radians(float(data[17][0]))) * math.cos(math.radians(float(data[17][0]) + math.radians(delta_lat))) * math.sin(math.radians(delta_long)/2)**2)):
             #if yes, any discrepincies are reasonable, so this isn't dodgy
             return False, False
         else:
@@ -233,29 +259,29 @@ def check_start_month(data):
     try:
         #check if month from start_date matches with month from start_month
         #strings starting with a 0 lose it when cast to an int
-        if int(data[0][1]) == 1 and data[10][0] == 'Janurary':
+        if int(data[0][1]) == 1 and data[11][0] == 'Janurary':
             return False, False
-        elif int(data[0][1]) == 2 and data[10][0] == 'February':
+        elif int(data[0][1]) == 2 and data[11][0] == 'February':
             return False, False
-        elif int(data[0][1]) == 3 and data[10][0] == 'March':
+        elif int(data[0][1]) == 3 and data[11][0] == 'March':
             return False, False
-        elif int(data[0][1]) == 4 and data[10][0] == 'April':
+        elif int(data[0][1]) == 4 and data[11][0] == 'April':
             return False, False
-        elif int(data[0][1]) == 5 and data[10][0] == 'May':
+        elif int(data[0][1]) == 5 and data[11][0] == 'May':
             return False, False
-        elif int(data[0][1]) == 6 and data[10][0] == 'June':
+        elif int(data[0][1]) == 6 and data[11][0] == 'June':
             return False, False
-        elif int(data[0][1]) == 7 and data[10][0] == 'July':
+        elif int(data[0][1]) == 7 and data[11][0] == 'July':
             return False, False
-        elif int(data[0][1]) == 8 and data[10][0] == 'August':
+        elif int(data[0][1]) == 8 and data[11][0] == 'August':
             return False, False
-        elif int(data[0][1]) == 9 and data[10][0] == 'September':
+        elif int(data[0][1]) == 9 and data[11][0] == 'September':
             return False, False
-        elif int(data[0][1]) == 10 and data[10][0] == 'October':
+        elif int(data[0][1]) == 10 and data[11][0] == 'October':
             return False, False
-        elif int(data[0][1]) == 11 and data[10][0] == 'Novermber':
+        elif int(data[0][1]) == 11 and data[11][0] == 'Novermber':
             return False, False
-        elif int(data[0][1]) == 12 and data[10][0] == 'December':
+        elif int(data[0][1]) == 12 and data[11][0] == 'December':
             return False, False
         #if months don't match data is dodgy but doesn't cause an error
         else:
@@ -279,8 +305,12 @@ def check_trip_duration(data):
                 #if it is, no issues with data
                 return False, False
             else:
-                #otherwise, there are issues with the data but they do not pose a risk of causing a crash
-                return True, False
+                #add leniency for very short journeys
+                if (duration >= 60 and duration <= 600) and (float(duration)/60 <= 2*float(data[6][0]) and float(duration)/60 >= 0.5*float(data[6][0])):
+                    return False, False
+                else:
+                    #otherwise, there are issues with the data but they do not pose a risk of causing a crash
+                    return True, False
         #check if year and month match
         elif data[0][1] == data[2][1] and data[0][2] == data[2][2]:
             #find the difference in  days, convert it to seconds
@@ -296,8 +326,12 @@ def check_trip_duration(data):
                 #if it is, no issues with data
                 return False, False
             else:
-                #otherwise, there are issues with the data but they cause no risk of crashing
-                return True, False
+                #add leniency for very short journeys
+                if (duration >= 60 and duration <= 600) and (float(duration)/60 <= 2*float(data[6][0]) and float(duration)/60 >= 0.5*float(data[6][0])):
+                    return False, False
+                else:
+                    #otherwise, there are issues with the data but they do not pose a risk of causing a crash
+                    return True, False
         #check if years match
         elif data[0][2] == data[2][2]:
             #if the month is april, june, september or november, handle this with a 30 day long month
@@ -321,7 +355,12 @@ def check_trip_duration(data):
             if float(duration)/60 <= 1.1*float(data[6][0]) and float(duration) >= 0.9*float(data[6][0]):
                 return False, False
             else:
-                return True, False
+                #add leniency for very short journeys
+                if (duration >= 60 and duration <= 600) and (float(duration)/60 <= 2*float(data[6][0]) and float(duration)/60 >= 0.5*float(data[6][0])):
+                    return False, False
+                else:
+                    #otherwise, there are issues with the data but they do not pose a risk of causing a crash
+                    return True, False
     except:
         return True, True
 
@@ -392,7 +431,7 @@ def check_end_date_is_after_start_date(data):
 def check_trip_time_speed_and_distance(data):
     try:
         #check that the distance found from time and speed is within +50/-10% of the distance listed
-        if float(data[6][0])*float(data[22][0]) >= 0.9*float(data[21][0]) and float(data[6][0])*float(data[22][0]) <= 1.5*float(data[21][0]):
+        if float(data[6][0])*float(data[22][0])/60 >= 0.9*float(data[21][0]) and float(data[6][0])*float(data[22][0])/60 <= 1.5*float(data[21][0]):
             #if it is say we're happy
             return False, False
         else:
@@ -442,15 +481,19 @@ def remove_error_causing_entries(data):
     #find initial length of array
     b = len(data)
     #loop for initial number of items in array
-    for a in range(0, b):
+    for a in range(1, b):
         #going backwards through the array check if this entry contains data that will cause an error
-        if data[b-a][23][0] == True:
+        if data[b-a][23] == True:
             #if it does, pop it
             data.pop(b-a)
     #return data that will not cause errors
     return data
 
 def check_unique_stations_and_station_usage_frequency(data):
+    #some stuff snuck through with a comma in it, I don't know why, this has confounded me while debugging and I've just split them again
+    #can we tell these bike folks to follow the rules of a csv file? commas inside of a cell is just ridiculous.
+    data[0][1] = data[0][1][0].split(',')
+    data[0][3] = data[0][3][0].split(',')
     #check if start and end stations in initial journey match, if not add both to array of stations
     if data[0][1][0] != data[0][3][0]:
         stations = [data[0][1][0], data[0][3][0]]
@@ -463,6 +506,9 @@ def check_unique_stations_and_station_usage_frequency(data):
         end_station_usage = [1]
     #loop through every date entry starting at second
     for a in range(1,len(data)):
+        #still scrubbing the commas from the station field. I gave up on doing this the way I'd rather do it.
+        data[a][1] = data[a][1][0].split(',')
+        data[a][3] = data[a][3][0].split(',')
         #set initial variables to say that start and end stations are not previously visited
         start_match = False
         end_match = False
@@ -498,19 +544,19 @@ def check_unique_stations_and_station_usage_frequency(data):
                 start_station_usage.append(1)
                 end_station_usage.append(1)
             else:
-                stations.append(data[a][1][0], data[a][3][0])
-                start_station_usage.append(1,0)
-                end_station_usage.append(0,1)
-   
+                stations.append(data[a][1][0])
+                stations.append(data[a][3][0])
+                start_station_usage.append(1)
+                start_station_usage.append(0)
+                end_station_usage.append(0)
+                end_station_usage.append(1)
+
     #add the unsorted ones together
     total_station_usage = start_station_usage + end_station_usage
-
     #sort stations by how many times they are the start station and save as it's own array, as well as number of times started at that station
-    start_stations, sorted_start_station_usage = bubble_sort_parallel_arrays(start_station_usage, stations)
+    start_stations, sorted_start_station_usage = bubble_sort_parallel_arrays(start_station_usage.copy(), stations.copy())
     #sort stations by how many times they are the end station and save as it's own array, as well as number of times ended at that station
-    end_stations, sorted_end_station_usage = bubble_sort_parallel_arrays(end_station_usage, stations)
-    
-    
+    end_stations, sorted_end_station_usage = bubble_sort_parallel_arrays(end_station_usage.copy(), stations.copy())
 
     #return array of stations visited, number of stations visited and the number of times each station was visited, all sorted
     return [[len(stations)], total_station_usage, stations, sorted_start_station_usage, start_stations, sorted_end_station_usage, end_stations, start_station_usage, end_station_usage]
@@ -529,7 +575,7 @@ def bubble_sort_parallel_arrays(number_array, info_array):
                 #if it is, switch current and next positions in the array of number of occurrences
                 number_array[a], number_array[a+1] = number_array[a+1], number_array[a]
                 #also switch current and next name in the array of names
-                info_array[a], info_array[a+1] = number_array[a+1], number_array[a]
+                info_array[a], info_array[a+1] = info_array[a+1], info_array[a]
                 #say that the arrays are not sorted yet
                 is_sorted = False
     #return sorted arrays
@@ -553,39 +599,39 @@ def analyse_filter_data(data):
     #set total journeys equal to number of data entries
     total_journeys = len(data)
     #set minimum trip duration to first duration entry
-    minimum_trip_duration = data[0][6][0]
+    minimum_trip_duration = float(data[0][6][0])
     #set maximum trip ruation to first duration entry
-    maximum_trip_duration = data[0][6][0]
+    maximum_trip_duration = float(data[0][6][0])
     #set total trip duration to first duration entry
-    total_trip_duration = data[0][6][0]
+    total_trip_duration = float(data[0][6][0])
     #set minimum trip distance to first distance entry
-    minimum_trip_distance = data[0][21][0]
+    minimum_trip_distance = float(data[0][21][0])
     #set maximum trip distance to first distance entry
-    maximum_trip_distance = data[0][21][0]
+    maximum_trip_distance = float(data[0][21][0])
     #set total trip distance to first distance netry
-    total_trip_distance = data[0][21][0]
+    total_trip_distance = float(data[0][21][0])
     #loop for every trip entry but first entry as it has already been entered
     for a in range(1,total_journeys):
         #check for new minimum trip duration
-        if data[a][6][0] < minimum_trip_duration:
+        if float(data[a][6][0]) < minimum_trip_duration:
             #update new minimum
-            minimum_trip_duration = data[a][6][0]
+            minimum_trip_duration = float(data[a][6][0])
         #if not new minimum trip duration, check for new maximum trip duration
-        elif data[a][6][0] > maximum_trip_duration:
+        elif float(data[a][6][0]) > maximum_trip_duration:
             #update new maximum
-            maximum_trip_duration = data[a][6][0]
+            maximum_trip_duration = float(data[a][6][0])
         #check for new minim trip distance
-        if data[a][21][0] < minimum_trip_distance:
+        if float(data[a][21][0]) < minimum_trip_distance:
             #update new minimum
-            minimum_trip_distance = data[a][21][0]
+            minimum_trip_distance = float(data[a][21][0])
         #if not new minimum trip distance, check for new maximum trip distance
-        elif data[a][21][0] > maximum_trip_distance:
+        elif float(data[a][21][0]) > maximum_trip_distance:
             #update new maximum
-            maximum_trip_distance = data[a][21][0]
+            maximum_trip_distance = float(data[a][21][0])
         #update total duration
-        total_trip_duration = total_trip_duration + data[a][6][0]
+        total_trip_duration = total_trip_duration + float(data[a][6][0])
         #update total distance
-        total_trip_distance = total_trip_distance + data[a][21][0]
+        total_trip_distance = total_trip_distance + float(data[a][21][0])
     #divide total duration by trip number for average trip duration
     average_trip_duration = total_trip_duration/total_journeys
     #divide total distance by trip number for average trip duration
@@ -632,7 +678,7 @@ def start_year_filter(data):
     #ask for year to filter for
     year = int(input('Enter year to filter for: '))
     #loop through all data entries
-    for a in range(0,b):
+    for a in range(1,b):
         #check if the data entry runs afoul of the filter, looping from the back to avoid issues when removing items
         if int(data[b-a][0][2]) != year:
             #remove item that does not meet filter criteria
@@ -643,7 +689,7 @@ def end_year_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     year = int(input('Enter year to filter for: '))
-    for a in range(0,b):
+    for a in range(1,b):
         if int(data[b-a][2][2]) != year:
             data.pop(b-a)
     return data
@@ -652,7 +698,7 @@ def start_station_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     station = str(input('Enter station name to filter by: '))
-    for a in range(0,b):
+    for a in range(1,b):
         if data[b-a][1][0] != station:
             data.pop(b-a)
     return data
@@ -661,7 +707,7 @@ def end_station_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     station = str(input('Enter station name to filter by: '))
-    for a in range(0,b):
+    for a in range(1,b):
         if data[b-a][3][0] != station:
             data.pop(b-a)
     return data
@@ -670,7 +716,7 @@ def rush_hour_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     c = str(input('Filter for during rush hour(d) or not during russh hour(nd): '))
-    for a in range(0,b):
+    for a in range(1,b):
         if (int(data[b-a][14][0]) == 0 and c.lower() == 'd') or (int(data[b-a][14][0]) != 0 and c.lower == 'nd'):
             data.pop[b-a]
     return data
@@ -678,8 +724,9 @@ def rush_hour_filter(data):
 def start_area_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
-    area = str(input('Enter area name to filter by: '))
-    for a in range(0,b):
+    #add a space because of how this data is stored in the input file
+    area = ' '+str(input('Enter area name to filter by: '))
+    for a in range(1,b):
         if data[b-a][1][1] != area:
             data.pop(b-a)
     return data
@@ -687,8 +734,9 @@ def start_area_filter(data):
 def end_area_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
-    area = str(input('Enter area name to filter by: '))
-    for a in range(0,b):
+    #add a space at the start because of how this data is stored in the input file
+    area = ' '+str(input('Enter area name to filter by: '))
+    for a in range(1,b):
         if data[b-a][3][1] != area:
             data.pop(b-a)
     return data
@@ -697,7 +745,7 @@ def start_hour_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     start_hour = str(input('Enter hour to filter by: '))
-    for a in range(0,b):
+    for a in range(1,b):
         if data[b-a][0][3] != start_hour:
             data.pop[b-a]
     return data
@@ -706,7 +754,7 @@ def end_hour_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     start_hour = str(input('Enter hour to filter by: '))
-    for a in range(0,b):
+    for a in range(1,b):
         if data[b-a][2][3] != start_hour:
             data.pop[b-a]
     return data
@@ -716,7 +764,7 @@ def duration_range_filter(data):
     b = len(data)
     min_duration = float(input('Enter minimum trip duration in minutes: '))
     max_duration = float(input('Enter maximum trip duration in minutes: '))
-    for a in range(0, b):
+    for a in range(1,b):
         if float(data[b-a][6][0]) < min_duration or float(data[b-a][6][0]) > max_duration:
             data.pop(b-a)
     return data
@@ -725,7 +773,7 @@ def weekend_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     choice = str(input('Filter for weekend (w) or weekday (wd) trips: '))
-    for a in range(0, b):
+    for a in range(1,b):
         if int(data[b-a][12][0]) != 0 and choice.lower() == 'wd':
             data.pop(b-a)
         elif int(data[b-a][12][0]) == 0 and choice.lower() == 'w':
@@ -733,6 +781,29 @@ def weekend_filter(data):
     return data
 
 def call_filters(data):
+    #ask user if they wish to remove data that seems out of place
+    remove_dodgy_data = str(input('Do you wish to remove data that is dodgy(y/n): '))
+    #if they do
+    if remove_dodgy_data.lower() == 'y':
+        #get inital length of arrau
+        a = len(data)
+        #open file to log issues in
+        c = open('error log.csv','w')
+        #loop for number of items in array
+        for b in range(1,a):
+            #check if position in array contains issues starting at the end of the array
+            if data[a-b][24] == True:
+                #log data in file
+                c.write(data[a-b]+'\n')
+                print('Data in question')
+                print(data[a-b])
+                #print header and what the issues where
+                print('Issue with this data: \n')
+                print(data[b-a][25])
+                #delete current data entry
+                data.pop(a-b)
+        #close error log file
+        c.close()
     #ask user how many filters to apply
     number_of_filters = int(input('How many filters do you want to add(integer): '))
     while number_of_filters < 0:
@@ -791,37 +862,35 @@ def print_general_data(data):
     return
 
 def print_station_usage(data):
+    print('\n')
     #print total number of stations
     print('Total number of stations visited was:', data[0][0])
     print('Most common starting stations where: ')
     #loop three times
-    for a in range(0,3):
+    for a in range(1,4):
         #print last position in array - loop we are on
-        print(data[4][len(data[4]-a)])
-    print('Most common end stations where: ')
+        print(data[4][len(data[4])-a])
+    print('\nMost common end stations where: ')
     #loop three times
-    for a in range(0,3):
+    for a in range(1,4):
         #print last position in array - loop we are on
-        print(data[6][len(data[4])-a])
+        print(data[6][len(data[6])-a])
     print()
     #ask if user wants a file
     if str(input('Write stations.csv y/n: ')) == 'y':
         #open a csv
-        b = open('station_usage.cvs','w')
+        b = open('station_usage.csv','w')
         #write headers to a csv
-        b.write('Stations','Start','End')
+        b.write('Stations,Start,End\n')
         #loop through all stations
-        for a in range(0,len(data[1])):
-            #print station, number of times started at this station and number of times ended at this station
-            b.write(data[1][a], data[7][a], data[8][a])
+        for a in range(0,data[0][0]):
+            b.write(str(data[2][a])+','+str(data[7][a])+','+str(data[8][a])+'\n')
         #close file
         b.close()
     return
 
 #set pre analysed data to the output of filters using the dataset with errors removed, using the validated data using parsed inputs from the open files function
 pre_analysed_data = call_filters(remove_error_causing_entries(run_validation_checks(parse_inputs(open_files()))))
-#close the files we opened
-close_files()
 #call the print general data function with the output of the analyse filter data function ran with the pre analysed data
 print_general_data(analyse_filter_data(pre_analysed_data))
 #print station usage using the output of check station usage ran with the pre analysed datab
