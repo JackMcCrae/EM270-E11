@@ -535,7 +535,7 @@ def check_unique_stations_and_station_usage_frequency(data):
             start_station_usage.append(1)
             end_station_usage.append(0)
         elif start_match == True and end_match == False:
-            stations.append(data[a][1][0])
+            stations.append(data[a][3][0])
             start_station_usage.append(0)
             end_station_usage.append(1)
         elif start_match == end_match == False:
@@ -645,7 +645,7 @@ def open_files():
     #loop for a number of times specified by user
     for a in range(0,int(input("How many files do you want to open? "))):
         #open file in location specified by user and append it to array of files
-        files.append(open(str(input('Enter file name and path: ')),'r'))
+        files.append(open(str(input('Enter file path: ')),'r'))
     #return array of files
     return files
 
@@ -678,7 +678,7 @@ def start_year_filter(data):
     #ask for year to filter for
     year = int(input('Enter year to filter for: '))
     #loop through all data entries
-    for a in range(1,b):
+    for a in range(1,b+1):
         #check if the data entry runs afoul of the filter, looping from the back to avoid issues when removing items
         if int(data[b-a][0][2]) != year:
             #remove item that does not meet filter criteria
@@ -689,7 +689,7 @@ def end_year_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     year = int(input('Enter year to filter for: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if int(data[b-a][2][2]) != year:
             data.pop(b-a)
     return data
@@ -698,7 +698,7 @@ def start_station_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     station = str(input('Enter station name to filter by: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if data[b-a][1][0] != station:
             data.pop(b-a)
     return data
@@ -707,7 +707,7 @@ def end_station_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     station = str(input('Enter station name to filter by: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if data[b-a][3][0] != station:
             data.pop(b-a)
     return data
@@ -716,7 +716,7 @@ def rush_hour_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     c = str(input('Filter for during rush hour(d) or not during russh hour(nd): '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if (int(data[b-a][14][0]) == 0 and c.lower() == 'd') or (int(data[b-a][14][0]) != 0 and c.lower == 'nd'):
             data.pop[b-a]
     return data
@@ -726,7 +726,7 @@ def start_area_filter(data):
     b = len(data)
     #add a space because of how this data is stored in the input file
     area = ' '+str(input('Enter area name to filter by: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if data[b-a][1][1] != area:
             data.pop(b-a)
     return data
@@ -736,7 +736,7 @@ def end_area_filter(data):
     b = len(data)
     #add a space at the start because of how this data is stored in the input file
     area = ' '+str(input('Enter area name to filter by: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if data[b-a][3][1] != area:
             data.pop(b-a)
     return data
@@ -745,7 +745,7 @@ def start_hour_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     start_hour = str(input('Enter hour to filter by: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if data[b-a][0][3] != start_hour:
             data.pop[b-a]
     return data
@@ -754,7 +754,7 @@ def end_hour_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     start_hour = str(input('Enter hour to filter by: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if data[b-a][2][3] != start_hour:
             data.pop[b-a]
     return data
@@ -764,7 +764,7 @@ def duration_range_filter(data):
     b = len(data)
     min_duration = float(input('Enter minimum trip duration in minutes: '))
     max_duration = float(input('Enter maximum trip duration in minutes: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if float(data[b-a][6][0]) < min_duration or float(data[b-a][6][0]) > max_duration:
             data.pop(b-a)
     return data
@@ -773,7 +773,7 @@ def weekend_filter(data):
     #look at start year filter for explanation of how filters work
     b = len(data)
     choice = str(input('Filter for weekend (w) or weekday (wd) trips: '))
-    for a in range(1,b):
+    for a in range(1,b+1):
         if int(data[b-a][12][0]) != 0 and choice.lower() == 'wd':
             data.pop(b-a)
         elif int(data[b-a][12][0]) == 0 and choice.lower() == 'w':
@@ -849,20 +849,20 @@ def call_filters(data):
 
 def print_general_data(data):
     #print header
-    print('\n========== PROCESSED DATA ==========\n')
+    print('\n============ PROCESSED DATA =============\n')
 
     #print data from filters
     print("Total Number of Journeys: ", data[0])
     print("Minimum Journey Duration: ", data[1])
     print("Maximum Journey Duration: ", data[2])
     print("Average Journey Duration: ", data[3])
-    print("Miniimum Trip Distance: ", data[4])
-    print("Maxiimum Trip Distance: ", data[5])
+    print("Minimum Trip Distance: ", data[4])
+    print("Maximum Trip Distance: ", data[5])
     print("Average Trip Distance:", data[6])
+    print('\n=========================================\n')
     return
 
 def print_station_usage(data):
-    print('\n')
     #print total number of stations
     print('Total number of stations visited was:', data[0][0])
     print('Most common starting stations where: ')
@@ -870,12 +870,13 @@ def print_station_usage(data):
     for a in range(1,4):
         #print last position in array - loop we are on
         print(data[4][len(data[4])-a])
-    print('\nMost common end stations where: ')
+    print('Note that if results where filtered by start station, second and third most common start stations where not used\n\n=========================================\n')
+    print('Most common end stations where: ')
     #loop three times
     for a in range(1,4):
         #print last position in array - loop we are on
         print(data[6][len(data[6])-a])
-    print()
+    print('Note that if results where filtered by end station, second and third most common start stations where not used\n\n=========================================\n')
     #ask if user wants a file
     if str(input('Write stations.csv y/n: ')) == 'y':
         #open a csv
@@ -893,5 +894,5 @@ def print_station_usage(data):
 pre_analysed_data = call_filters(remove_error_causing_entries(run_validation_checks(parse_inputs(open_files()))))
 #call the print general data function with the output of the analyse filter data function ran with the pre analysed data
 print_general_data(analyse_filter_data(pre_analysed_data))
-#print station usage using the output of check station usage ran with the pre analysed datab
+#print station usage using the output of check station usage ran with the pre analysed data
 print_station_usage(check_unique_stations_and_station_usage_frequency(pre_analysed_data))
