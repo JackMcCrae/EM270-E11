@@ -490,6 +490,8 @@ def remove_error_causing_entries(data):
     return data
 
 def check_unique_stations_and_station_usage_frequency(data):
+    if len(data) < 1:
+        return [[0], [0], ['No stations visited'], [0], ['No stations visited'], [0], ['No stations visited'], [0], [0]]
     #check if start and end stations in initial journey match, if not add both to array of stations
     if data[0][1][0] != data[0][3][0]:
         stations = [data[0][1][0], data[0][3][0]]
@@ -592,6 +594,8 @@ def filter_start_day(data):
     return filtered_data
 
 def analyse_filter_data(data):
+    if len(data) < 1:
+        return [0, 0, 0, 0, 0, 0, 0]
     #set total journeys equal to number of data entries
     total_journeys = len(data)
     #set minimum trip duration to first duration entry
@@ -852,13 +856,16 @@ def print_general_data(data):
     print("Minimum Journey Duration: ", data[1])
     print("Maximum Journey Duration: ", data[2])
     print("Average Journey Duration: ", data[3])
-    print("Minimum Trip Distance: ", data[4])
-    print("Maximum Trip Distance: ", data[5])
-    print("Average Trip Distance:", data[6])
+    print("Minimum Trip Distance:    ", data[4])
+    print("Maximum Trip Distance:    ", data[5])
+    print("Average Trip Distance:    ", data[6])
     print('\n=========================================\n')
     return
 
 def print_station_usage(data):
+    if int(data[0][0]) == 0:
+        print('No stations visited, likely due to improper filter parameters')
+        return
     #print total number of stations
     print('Total number of stations visited was:', data[0][0])
     print('Most common starting stations where: ')
