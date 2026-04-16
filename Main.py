@@ -717,7 +717,7 @@ def rush_hour_filter(data):
     b = len(data)
     c = str(input('Filter for during rush hour(d) or not during russh hour(nd): '))
     for a in range(1,b+1):
-        if (int(data[b-a][12][0]) == 0 and c.lower() == 'd') or (int(data[b-a][12][0]) != 0 and c.lower == 'nd'):
+        if (int(data[b-a][13][0]) == 0 and c.lower() == 'd') or (int(data[b-a][13][0]) != 0 and c.lower == 'nd'):
             data.pop(b-a)
     return data
 
