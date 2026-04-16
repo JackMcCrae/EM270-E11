@@ -11,7 +11,7 @@ def parse_inputs(file_array):
             if b[0] != 's':
                 #append array of all data in this line to array of entries
                 parsed_data.append(b.split(','))
-    #rejoin start station and start area entries and make sure no other wird stuff is going on with more commas in a cell
+    #rejoin start station and start area entries and make sure no other wierd stuff is going on with more commas in a cell
     for a in range(0,len(parsed_data)):
         while '/' not in parsed_data[a][2]:
             parsed_data[a][1] = parsed_data[a][1]+','+parsed_data[a][2]
@@ -107,7 +107,7 @@ def reformat_and_note_errors(current_entry, b):
         current_entry = [current_entry]
         #return unchanged entry and that there was an error
         return current_entry, False
-    
+
 def check_leap_year(data,field):
     #checking if year is after year 1 AD
     if int(data[field][2] > 0):
@@ -289,7 +289,7 @@ def check_start_month(data):
     #if an error occurs then the dta is dodgy and causes an error so return that
     except:
         return True, True
-    
+
 def check_trip_duration(data):
     try:
         #check if the start date and end date have the same date
@@ -376,7 +376,7 @@ def check_trip_category_with_duration(data):
     except:
         #if things break return that it breaks
         return True, True
-    
+
 def check_if_weekend(data):
     try:
         #compare day of week to if 'is_weekend' is high. If high on weekend, return that there are no issues
@@ -391,7 +391,7 @@ def check_if_weekend(data):
     except:
         #otherwise mention big issues
         return True, True
-    
+
 def check_end_date_is_after_start_date(data):
     try:
         #check if end year is after start year
@@ -476,7 +476,7 @@ def check_date_exists(data):
             return False, False
     except:
         return True, True
-    
+
 def remove_error_causing_entries(data):
     #find initial length of array
     b = len(data)
@@ -490,10 +490,6 @@ def remove_error_causing_entries(data):
     return data
 
 def check_unique_stations_and_station_usage_frequency(data):
-    #some stuff snuck through with a comma in it, I don't know why, this has confounded me while debugging and I've just split them again
-    #can we tell these bike folks to follow the rules of a csv file? commas inside of a cell is just ridiculous.
-    data[0][1] = data[0][1][0].split(',')
-    data[0][3] = data[0][3][0].split(',')
     #check if start and end stations in initial journey match, if not add both to array of stations
     if data[0][1][0] != data[0][3][0]:
         stations = [data[0][1][0], data[0][3][0]]
