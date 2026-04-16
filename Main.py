@@ -717,8 +717,8 @@ def rush_hour_filter(data):
     b = len(data)
     c = str(input('Filter for during rush hour(d) or not during russh hour(nd): '))
     for a in range(1,b+1):
-        if (int(data[b-a][14][0]) == 0 and c.lower() == 'd') or (int(data[b-a][14][0]) != 0 and c.lower == 'nd'):
-            data.pop[b-a]
+        if (int(data[b-a][12][0]) == 0 and c.lower() == 'd') or (int(data[b-a][12][0]) != 0 and c.lower == 'nd'):
+            data.pop(b-a)
     return data
 
 def start_area_filter(data):
@@ -726,8 +726,12 @@ def start_area_filter(data):
     b = len(data)
     #add a space because of how this data is stored in the input file
     area = ' '+str(input('Enter area name to filter by: '))
-    for a in range(1,b+1):
-        if data[b-a][1][1] != area:
+    for a in range(1,b+1): 
+        #filter out some things that just break this
+        if len(data[b-a][1]) < 2:
+            data.pop(b-a)
+        elif data[b-a][1][1] != area:   
+            print(data[b-a][1][1])
             data.pop(b-a)
     return data
 
@@ -747,7 +751,7 @@ def start_hour_filter(data):
     start_hour = str(input('Enter hour to filter by: '))
     for a in range(1,b+1):
         if data[b-a][0][3] != start_hour:
-            data.pop[b-a]
+            data.pop(b-a)
     return data
 
 def end_hour_filter(data):
@@ -756,7 +760,7 @@ def end_hour_filter(data):
     start_hour = str(input('Enter hour to filter by: '))
     for a in range(1,b+1):
         if data[b-a][2][3] != start_hour:
-            data.pop[b-a]
+            data.pop(b-a)
     return data
 
 def duration_range_filter(data):
