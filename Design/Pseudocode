@@ -294,6 +294,8 @@ remove_error_causing_entries
 
 
 check_unique_stations_and_station_usage_frequency
+	check if the data length is less than 1
+		return array of 0s and end filter
 	check if first start station and first end station are not the same
 		record both in array of stations
 		set array of times each station started at to begin 1, 0
@@ -349,6 +351,8 @@ bubble_sort_parallel_arrays
 
 
 analyse_filter_data
+	check if data length is less than 1
+		return array of 0s for all filters and end function
 	set total journeys to the number of data entries
 	set minimum trip duration to the first duration entry
 	set maximum trip duration to the first duration entry
